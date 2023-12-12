@@ -1,16 +1,16 @@
 import numpy as np
 
-from regression_metrics.regression.regression_evaluator import RegressionEvaluator
+from auto_evaluator.evaluation_metrics.regression.regression_evaluator.regression_evaluator import RegressionEvaluator
 
 
 class MeanBiasDeviation(RegressionEvaluator):
     """
     Mean Bias Deviation.
     """
-    def __init__(self, y_true, y_pred):
-        super().__init__(y_true, y_pred)
+    def __init__(self, target, prediction):
+        super().__init__(target, prediction)
 
-    def calculate(self):
+    def measure(self):
         """
         Calculate Mean Bias Deviation.
 
@@ -18,6 +18,6 @@ class MeanBiasDeviation(RegressionEvaluator):
             mean_bias_deviation (float): Mean Bias Deviation.
         """
         try:
-            return np.mean(self.y_pred - self.y_true)
+            return np.mean(self.target - self.prediction)
         except ValueError as ve:
             raise ValueError(f'Error calculating mean absolute error: {ve}')

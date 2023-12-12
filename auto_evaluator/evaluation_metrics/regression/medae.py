@@ -1,16 +1,16 @@
 from sklearn.metrics import median_absolute_error
 
-from regression_metrics.regression.regression_evaluator import RegressionEvaluator
+from auto_evaluator.evaluation_metrics.regression.regression_evaluator.regression_evaluator import RegressionEvaluator
 
 
 class MEDAE(RegressionEvaluator):
     """
     Median Absolute Error.
     """
-    def __init__(self, y_true, y_pred):
-        super().__init__(y_true, y_pred)
+    def __init__(self, target, prediction):
+        super().__init__(target, prediction)
 
-    def calculate(self):
+    def measure(self):
         """
         Calculate Median Absolute Error.
 
@@ -18,6 +18,6 @@ class MEDAE(RegressionEvaluator):
             medae (float): Median Absolute Error.
         """
         try:
-            return median_absolute_error(self.y_true, self.y_pred)
+            return median_absolute_error(self.target, self.prediction)
         except ValueError as ve:
             raise ValueError(f'Error calculating mean absolute error: {ve}')

@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from regression_metrics.medae import MEDAE
+from auto_evaluator.evaluation_metrics.regression.medae import MEDAE
 
 
 class TestMEDAE(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestMEDAE(unittest.TestCase):
 
     def test_medae_calculation(self):
         medae_evaluator = MEDAE(self.y_true, self.y_pred)
-        result = medae_evaluator.calculate()
+        result = medae_evaluator.measure()
         expected_result = 0.5
         self.assertAlmostEqual(result, expected_result, places=5)
 

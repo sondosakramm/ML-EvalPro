@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from regression_metrics.mae import MAE
+from auto_evaluator.evaluation_metrics.regression.mae import MAE
 
 
 class TestMAE(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestMAE(unittest.TestCase):
 
     def test_mae_calculation(self):
         mae_evaluator = MAE(self.y_true, self.y_pred)
-        result = mae_evaluator.calculate()
+        result = mae_evaluator.measure()
         expected_result = 0.5
         self.assertAlmostEqual(result, expected_result, places=5)
 
@@ -21,7 +21,7 @@ class TestMAE(unittest.TestCase):
         invalid_y_pred = np.array([4, 5, 6, 7])
         with self.assertRaises(ValueError):
             mae_evaluator = MAE(invalid_y_true, invalid_y_pred)
-            mae_evaluator.calculate()
+            mae_evaluator.measure()
 
 
 if __name__ == '__main__':

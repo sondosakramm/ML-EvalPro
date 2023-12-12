@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from regression_metrics.r_square_error import RSquare
+from auto_evaluator.evaluation_metrics.regression.r_square_error import RSquare
 
 
 class TestRSquare(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestRSquare(unittest.TestCase):
 
     def test_r_square_calculation(self):
         r_square_evaluator = RSquare(self.y_true, self.y_pred)
-        result = r_square_evaluator.calculate()
+        result = r_square_evaluator.measure()
         expected_result = 0.9486081370449679
         self.assertAlmostEqual(result, expected_result, places=5)
 

@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from auto_evaluator.utils import validation
+
 
 class EvaluationMetric(ABC):
     """
@@ -13,6 +15,7 @@ class EvaluationMetric(ABC):
         """
         self.target = target
         self.prediction = prediction
+        validation.check_consistent_length(target, prediction)
 
 
     @abstractmethod

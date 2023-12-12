@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from regression_metrics.mean_bias_deviation import MeanBiasDeviation
+from auto_evaluator.evaluation_metrics.regression.mean_bias_deviation import MeanBiasDeviation
 
 
 class TestMeanBiasDeviation(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestMeanBiasDeviation(unittest.TestCase):
 
     def test_mean_bias_deviation_calculation(self):
         mean_bias_deviation_evaluator = MeanBiasDeviation(self.y_true, self.y_pred)
-        result = mean_bias_deviation_evaluator.calculate()
+        result = mean_bias_deviation_evaluator.measure()
         expected_result = 0.25
         self.assertAlmostEqual(result, expected_result, places=5)
 

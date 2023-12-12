@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from regression_metrics.mape import MAPE
+from auto_evaluator.evaluation_metrics.regression.mape import MAPE
 
 
 class TestMAPE(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestMAPE(unittest.TestCase):
 
     def test_mape_calculation(self):
         mape_evaluator = MAPE(self.y_true, self.y_pred)
-        result = mape_evaluator.calculate()
+        result = mape_evaluator.measure()
         expected_result = 32.73809523809524
         self.assertAlmostEqual(result, expected_result, places=5)
 

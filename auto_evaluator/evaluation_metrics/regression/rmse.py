@@ -1,17 +1,17 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error
 
-from regression_metrics.regression.regression_evaluator import RegressionEvaluator
+from auto_evaluator.evaluation_metrics.regression.regression_evaluator.regression_evaluator import RegressionEvaluator
 
 
 class RMSE(RegressionEvaluator):
     """
     Root Mean Squared Error
     """
-    def __init__(self, y_true, y_pred):
-        super().__init__(y_true, y_pred)
+    def __init__(self, target, prediction):
+        super().__init__(target, prediction)
 
-    def calculate(self):
+    def measure(self):
         """
         Calculate Root Mean Squared Error
 
@@ -19,7 +19,7 @@ class RMSE(RegressionEvaluator):
             rmse (float): Root Mean Squared Error
         """
         try:
-            mse = mean_squared_error(self.y_true, self.y_pred)
+            mse = mean_squared_error(self.target, self.prediction)
             return np.sqrt(mse)
         except ValueError as ve:
             raise ValueError(f'Error calculating mean absolute error: {ve}')
