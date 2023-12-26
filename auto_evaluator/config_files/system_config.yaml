@@ -1,0 +1,10 @@
+energy_generator:
+  name: 'Fuel'
+  value: 0.865
+
+cpu:
+  name: 'Xeon'
+  speed: '2.2GHZ'
+  value: 0.061
+
+
