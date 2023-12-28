@@ -40,3 +40,16 @@ class ModelBias:
             features_bias.append(bias.check_bias())
 
         return features_bias
+
+    def __str__(self):
+        features_bias = self.__call__()
+        results_string = ("The model bias results state the following according to each feature:\n"
+                          "---------------------------------------------------------------------\n")
+
+        for bias in features_bias:
+            biased = "biased"
+            if not bias[2]:
+                biased = "not" + biased
+
+            results_string += f"The model is '{biased}' for the feature '{bias[0]}' with value {bias[1]}\n"
+        return results_string
