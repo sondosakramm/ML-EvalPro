@@ -1,41 +1,56 @@
 import pandas as pd
 
 from auto_evaluator.bias.feature_bias.feature_bias import FeatureBias
-from sklearn.cluster import KMeans
 
 class NumericalBias(FeatureBias):
     """
     A class for the numerical bias of an input feature.
     """
-    def __init__(self, model, target: pd.Series, feature: pd.Series,
-                 performance_metric: str = 'accuracy', significance: float = 0.05,
-                 no_of_clusters: int = 5):
+    def __init__(self, model, target: pd.Series, features: pd.DataFrame, feature_name:str,
+                 performance_metric: str = 'accuracy', significance: float = 0.05):
         """
         Initializing the feature bias needed inputs.
         :param model: the model.
         :param target: the target prediction values.
-        :param feature: the input feature values.
+        :param features: the input feature values.
+        :param feature_name: the input feature name.
         :param performance_metric: the performance metric used for measuring the bias.
         :param significance: the significance value to measure bias.
-        :param no_of_clusters: the number of binning ranges of the numerical feature.
         """
-        super().__init__(model, target, feature, performance_metric, significance)
-        self.no_of_clusters = no_of_clusters
+        super().__init__(model, target, features, feature_name, performance_metric, significance)
+
+        # TODO: Calculate the optimal number of bins
+        self.no_of_bins = 10
+        self.features_binned = self.__get_binning_indices()
 
 
-    def __call__(self, *args, **kwargs):
+    def check_bias(self, *args):
         """
         Calculating the numerical bias of a single feature.
         :return: the average absolute performances and a boolean indicating if the model is biased according to that feature.
         """
+        return self._check_feature_bias(self.features_binned)
 
-        # Binning the feature numerical ranges by KMeans clustering by the input number of clusters.
-        kmeans_clustering = KMeans(n_clusters=self.no_of_clusters)
-        clusters = kmeans_clustering.fit_predict(self.feature)
 
-        eval_metrics = self._calculate_categorical_metrics(clusters)
-        pairwise_diff, avg_abs_performance = FeatureBias._calculate_average_absolute_performance(eval_metrics)
+    def __get_binning_indices(self) -> pd.Series:
+        """
+        Binning the features by sorting them in ascending order and labeling them
+        :return: the features after binning.
+        """
+        ordered_feature = self.features[self.feature_name].sort_values()
+        feature_binned = self.features[self.feature_name].copy()
 
-        return avg_abs_performance, avg_abs_performance >= self.significance
+        bin_instances_size = int(self.features.size / self.no_of_bins)
+
+        for i in range(self.no_of_bins):
+            start_index = i*bin_instances_size
+            end_index = (i+1)*bin_instances_size
+
+            if ordered_feature.size < end_index or i == self.no_of_bins - 1:
+                end_index = ordered_feature.size
+
+            feature_binned.replace(ordered_feature[start_index:end_index].tolist(), i, inplace=True)
+
+        return feature_binned
 
 

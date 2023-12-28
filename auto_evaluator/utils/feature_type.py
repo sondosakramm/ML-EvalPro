@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas.core.dtypes.common import is_string_dtype
 
 from auto_evaluator.utils.feature_type_enum import FeatureTypeEnum
 
@@ -9,6 +10,6 @@ def check_feature_type(feature:pd.Series) -> FeatureTypeEnum:
     :param feature: the input feature.
     :return: An enum indicating the feature type.
     """
-    if feature.astype(object) and feature.unique().size < feature.size:
+    if is_string_dtype(feature) and feature.unique().size < feature.size:
         return FeatureTypeEnum.CATEGORICAL
     return FeatureTypeEnum.NUMERICAL

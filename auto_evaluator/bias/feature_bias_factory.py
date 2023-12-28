@@ -16,8 +16,8 @@ class FeatureBiasFactory:
         :param feature_type: the input feature type.
         :return: the created feature bias class according to its type.
         """
-        _factory_supported_classes = {FeatureTypeEnum.CATEGORICAL.value: NumericalBias,
-                                      FeatureTypeEnum.NUMERICAL.value: CategoricalBias}
+        _factory_supported_classes = {FeatureTypeEnum.NUMERICAL.value: NumericalBias,
+                                      FeatureTypeEnum.CATEGORICAL.value: CategoricalBias}
 
         if feature_type in _factory_supported_classes:
             subclass = _factory_supported_classes.get(feature_type)
