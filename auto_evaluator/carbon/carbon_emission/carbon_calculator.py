@@ -17,7 +17,7 @@ class CarbonCalculator:
 
     def calculate_carbon(self):
         """
-        Calculate carbon emissions per prediction.
+        Calculate carbon emissions.
 
         return:
         - float: carbon emissions per prediction.
