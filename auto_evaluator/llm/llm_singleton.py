@@ -5,6 +5,9 @@ from langchain_experimental.chat_models import Llama2Chat
 from langchain.prompts import ChatPromptTemplate
 
 class LLMSingleton:
+    """
+    A singleton class for initializing the LLM instance.
+    """
     __llm = None
 
     def __new__(cls):
@@ -14,6 +17,11 @@ class LLMSingleton:
 
     @classmethod
     def __create_llm(cls, model_path_str: str):
+        """
+        Initializing the LLM.
+        :param model_path_str: the path to the LLM model file (.gguf extension) for LLamaCpp.
+        :return: the instantiated model.
+        """
         model_path = expanduser(model_path_str)
 
         llm = LlamaCpp(
@@ -28,7 +36,12 @@ class LLMSingleton:
         return model
 
     @classmethod
-    def execute_prompt(cls, prompt, **kwargs):
+    def execute_prompt(cls, prompt: str, **kwargs):
+        """
+        Executing the prompt with the LLM.
+        :param prompt: the input prompt to the LLM with the used variables (if any).
+        :return: the response content according to the input prompt.
+        """
         prompt_template = ChatPromptTemplate.from_template(prompt)
         msg_format = prompt_template.format_messages(**kwargs)
 

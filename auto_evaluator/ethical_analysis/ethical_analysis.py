@@ -4,17 +4,31 @@ from auto_evaluator.llm.llm_singleton import LLMSingleton
 
 
 class EthicalAnalysis:
-    def __init__(self, model, test_data,features_description:dict=None, feature_importance_method:str='shap'):
+    """
+    A class for measuring the ethical analysis for each input feature.
+    """
+    def __init__(self, model, data, features_description:dict=None, feature_importance_method:str= 'shap'):
+        """
+        Initializing the ethical analysis needed inputs.
+        :param model: the model.
+        :param data: the dataset containing all the features.
+        :param features_description: a short description for each feature.
+        :param feature_importance_method: the method used to measure the feature importance.
+        """
         self.model = model
-        self.test_data = test_data
+        self.data = data
         self.features_description = features_description
         self.feature_importance_method = feature_importance_method
 
 
     def __call__(self, *args, **kwargs):
+        """
+        Executing the ethical analysis on features.
+        :return: the importance value of each feature and the ethical perspective of the most important features.
+        """
         feature_importance_obj = FeatureImportanceFactory.create(self.feature_importance_method,
                                                                  model=self.model,
-                                                                 test_data=self.test_data)
+                                                                 data=self.data)
 
         feature_importance_all_vals = feature_importance_obj.calculate()
 
@@ -27,7 +41,11 @@ class EthicalAnalysis:
 
 
     def __prompt_feature_ethnicity(self, feature_importance_vals):
-
+        """
+        Initializing the model feature importance method needed inputs.
+        :param feature_importance_vals: the importance values of each feature.
+        :return: the ethical perspective of the top 3 or 5 important features.
+        """
         template_feature_importance = """<<SYS>> \nYou are an assistant tasked with answering machine learning related questions.\n <</SYS>>\n\n\
         [INST] You MUST answer the question using ONLY one sentence to illustrate your answer:
         {question} [/INST]"""
