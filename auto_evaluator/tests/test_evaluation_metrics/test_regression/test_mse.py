@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from auto_evaluator.evaluation_metrics.regression.mse import MSE
+from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.mse import MSE
 
 
 class TestMSE(unittest.TestCase):

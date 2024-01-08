@@ -8,15 +8,6 @@ class ECEMetric(ProbabilityClassification):
     """
     A class for evaluating the model using expected (or estimated) calibration error evaluation metric.
     """
-    def __init__(self, target: np.ndarray, predictions_prob: np.ndarray, number_of_classes:int =2, n_bins: int=5):
-        """
-        Initializing expected (or estimated) calibration error evaluation metric.
-        :param target: the target class true values.
-        :param predictions_prob: the prediction probability of the positive class.
-        :param number_of_classes: the number of classes in this model.
-        :param n_bins: the number of bins needed.
-        """
-        super().__init__(target, predictions_prob, number_of_classes, n_bins)
 
     def measure(self):
         """
@@ -53,4 +44,3 @@ class ECEMetric(ProbabilityClassification):
         :return: the confidence values.
         """
         return np.max(self.prediction_prob, axis=1)
-

@@ -1,15 +1,12 @@
 from sklearn.metrics import mean_absolute_error
 
-from auto_evaluator.evaluation_metrics.regression.regression_evaluator.regression_evaluator import RegressionEvaluator
+from auto_evaluator.evaluation_metrics.regression.regression_evaluator import RegressionEvaluator
 
 
 class MAE(RegressionEvaluator):
     """
     Mean Absolute Error
     """
-    def __init__(self, target, prediction):
-        super().__init__(target, prediction)
-
     def measure(self):
         """
         Calculate Mean Absolute Error

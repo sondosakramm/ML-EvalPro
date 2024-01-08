@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from auto_evaluator.evaluation_metrics.regression.r_square_error import RSquare
+from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.r_square_error import RSquare
 
 
 class TestRSquare(unittest.TestCase):

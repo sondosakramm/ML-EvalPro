@@ -8,7 +8,8 @@ class ModelBias:
     """
     A class for measuring the model bias.
     """
-    def __init__(self, model, data: pd.DataFrame, target:pd.Series, performance_metric='accuracy',
+
+    def __init__(self, model, data: pd.DataFrame, target: pd.Series, performance_metric='accuracy',
                  significance: float = 0.05):
         """
         Initializing the model bias needed inputs.
@@ -23,7 +24,6 @@ class ModelBias:
         self.target = target
         self.performance_metric = performance_metric
         self.significance = significance
-
 
     def __call__(self, *args, **kwargs):
         """

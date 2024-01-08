@@ -4,16 +4,16 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 
-from auto_evaluator.evaluation_metrics.classification.class_evaluation.accuracy import Accuracy
-from auto_evaluator.evaluation_metrics.regression.mape import MAPE
+from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.mape import MAPE
 
 
 class FeatureBias(ABC):
     """
     An abstract class for input feature bias.
     """
-    def __init__(self, model, target:pd.Series, features:pd.DataFrame, feature_name:str,
-                 performance_metric: str='accuracy', significance:float=0.05):
+
+    def __init__(self, model, target: pd.Series, features: pd.DataFrame, feature_name: str,
+                 performance_metric: str = 'accuracy', significance: float = 0.05):
         """
         Initializing the feature bias needed inputs.
         :param model: the model.
@@ -33,24 +33,25 @@ class FeatureBias(ABC):
     @abstractmethod
     def check_bias(self):
         """
-        Calculating the bias of a single feature.
-        :return: the average absolute performances and a boolean indicating if the model is biased according to that feature.
+        Calculating the bias of a single feature. :return: the average absolute performances and a boolean indicating
+        if the model is biased according to that feature.
         """
         pass
 
-    def _check_feature_bias(self, categorical_feature:pd.Series):
+    def _check_feature_bias(self, categorical_feature: pd.Series):
         """
         Calculating the bias of a single feature.
-        :param categorical_feature: the categorical feature used for measuring the performance.
-        :return: the average absolute performances and a boolean indicating if the model is biased according to that feature.
+        :param categorical_feature: the categorical feature used for
+        measuring the performance.
+        :return: the average absolute performances and a boolean indicating if the model
+        is biased according to that feature.
         """
         eval_metrics = self.__calculate_metrics(categorical_feature)
         pairwise_diff, avg_abs_performance = FeatureBias._calculate_average_absolute_performance(eval_metrics)
 
         return self.feature_name, avg_abs_performance, avg_abs_performance >= self.significance
 
-
-    def __calculate_metrics(self, categorical_feature:pd.Series) -> list:
+    def __calculate_metrics(self, categorical_feature: pd.Series) -> list:
         """
         Calculating the feature performance.
         :param categorical_feature: the categorical feature used for measuring the performance.
@@ -65,7 +66,7 @@ class FeatureBias(ABC):
             category_predictions = self.model.predict(category_data)
 
             # TODO: Replacing with a evaluation metric factory.
-            eval_metrics.append(MAPE(self.target[category_data_index].tolist(), category_predictions).measure()/100)
+            eval_metrics.append(MAPE(self.target[category_data_index].tolist(), category_predictions).measure() / 100)
             # eval_metrics.append(Accuracy(self.target[category_data_index].tolist(), category_predictions).measure())
 
         return eval_metrics
@@ -81,6 +82,7 @@ class FeatureBias(ABC):
         eval_metrics_size = len(eval_metrics)
 
         for i in range(eval_metrics_size):
-            pairwise_difference.extend([abs(eval_metrics[i] - eval_metrics[j]) for j in range(i+1, eval_metrics_size)])
+            pairwise_difference.extend(
+                [abs(eval_metrics[i] - eval_metrics[j]) for j in range(i + 1, eval_metrics_size)])
 
         return pairwise_difference, np.average(pairwise_difference)

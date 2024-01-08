@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from auto_evaluator.evaluation_metrics.regression.medae import MEDAE
+from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.medae import MEDAE
 
 
 class TestMEDAE(unittest.TestCase):

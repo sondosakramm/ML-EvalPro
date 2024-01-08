@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from auto_evaluator.evaluation_metrics.regression.mae import MAE
+from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.mae import MAE
 
 
 class TestMAE(unittest.TestCase):
