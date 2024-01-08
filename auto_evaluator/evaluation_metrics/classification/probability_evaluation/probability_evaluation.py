@@ -9,7 +9,7 @@ class ProbabilityClassification(ClassificationEvaluation, ABC):
     """
     An abstract class for a probability-based classification evaluation metric.
     """
-    def __init__(self, target, prediction_prob, number_of_classes:int =2, n_bins: int=5):
+    def __init__(self, target, prediction_prob, number_of_classes: int = 2, n_bins: int = 5):
         """
         Initializing the values needed for the probability-based classification evaluation metric.
         :param target: the target true values.

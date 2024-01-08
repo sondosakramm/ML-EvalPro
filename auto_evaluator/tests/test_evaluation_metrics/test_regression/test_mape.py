@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from auto_evaluator.evaluation_metrics.regression.mape import MAPE
+from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.mape import MAPE
 
 
 class TestMAPE(unittest.TestCase):

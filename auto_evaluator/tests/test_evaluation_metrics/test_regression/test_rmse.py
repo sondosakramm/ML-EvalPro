@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from auto_evaluator.evaluation_metrics.regression.rmse import RMSE
+from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.rmse import RMSE
 
 
 class TestRMSE(unittest.TestCase):

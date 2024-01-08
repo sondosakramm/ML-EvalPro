@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from auto_evaluator.evaluation_metrics.regression.mean_bias_deviation import MeanBiasDeviation
+from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.mean_bias_deviation import MeanBiasDeviation
 
 
 class TestMeanBiasDeviation(unittest.TestCase):
