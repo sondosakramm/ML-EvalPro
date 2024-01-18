@@ -41,7 +41,7 @@ class TestReliabilityDiagram(unittest.TestCase):
         with patch('sklearn.calibration.calibration_curve', mock_calibration_curve):
             calibration_info = reliability_diagram.measure()
 
-            # Check if the returned calibration info matches the expected calibration curve output
+            # Check if the returned calibration info matches the expected calibration curve outputs
             expected_calibration_info = ([1.0, 1.0, 0.0], [0.2, 0.4, 0.8])
 
             # Check each element separately due to possible numerical differences
@@ -59,7 +59,7 @@ class TestReliabilityDiagram(unittest.TestCase):
 
             print(calibration_info)
 
-            # Check if the returned calibration info matches the expected calibration curve output
+            # Check if the returned calibration info matches the expected calibration curve outputs
             expected_calibration_info = [([0.0, 1.0], [0.15, 0.75]), ([0.0, 1.0], [0.2, 0.55]), ([0.0, 1.0, 1.0], [0.2, 0.5, 0.7])]
 
             # Check each element separately due to possible numerical differences
