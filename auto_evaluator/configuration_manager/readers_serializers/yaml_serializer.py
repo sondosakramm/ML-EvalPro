@@ -24,5 +24,6 @@ class YamlSerializer:
 
         return {
             'energy_generator': self.file['energy_generator'],
-            'cpu': self.file['cpu']
+            'cpu': self.file['cpu'],
+            'variance': self.file['variance']
         }
