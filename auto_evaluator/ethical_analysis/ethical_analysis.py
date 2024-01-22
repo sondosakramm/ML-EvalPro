@@ -34,7 +34,6 @@ class EthicalAnalysis:
 
         if self.features_description:
             LLMSingleton()
-
             return feature_importance_all_vals, self.__prompt_feature_ethnicity(feature_importance_all_vals[0])
 
         return feature_importance_all_vals
