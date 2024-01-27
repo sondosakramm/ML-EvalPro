@@ -14,10 +14,10 @@ class SHAP(FeatureImportance):
         Calculating the feature importance with SHAP method.
         :return: The feature importance values sorted in descending order, SHAP values, and the expected values for each feature.
         """
-        explainer = shap.Explainer(self.model)
-        shap_vals = explainer.shap_values(self.data)
-        feature_importance = self.__calculate__shap_abs_mean(shap_vals)
-        return feature_importance, shap_vals, explainer.expected_value
+        explainer = shap.Explainer(self.model.predict, shap.utils.sample(self.data, int(self.data.shape[0] * 0.1)))
+        shap_values = explainer(self.data)
+        feature_importance = self.__calculate__shap_abs_mean(shap_values)
+        return feature_importance
 
     def __calculate__shap_abs_mean(self, shap_values):
         """

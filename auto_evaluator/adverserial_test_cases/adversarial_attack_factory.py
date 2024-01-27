@@ -1,5 +1,5 @@
 from auto_evaluator.adverserial_test_cases.adversarial_attack import AdversarialAttack
-from auto_evaluator.adverserial_test_cases.adversarial_evasion_attack import AdversarialEvasionAttack
+from auto_evaluator.adverserial_test_cases.adversarial_attack_substitute import AdversarialAttackSubstitute
 
 
 class AdversarialAttackFactory:
@@ -14,7 +14,7 @@ class AdversarialAttackFactory:
         :param attack_type: the attack type.
         :return: the created attack class according to its type.
         """
-        _factory_supported_classes = {"evasion_attack": AdversarialEvasionAttack}
+        _factory_supported_classes = {"substitute_model_attack": AdversarialAttackSubstitute}
 
         if attack_type in _factory_supported_classes:
             subclass = _factory_supported_classes.get(attack_type)
