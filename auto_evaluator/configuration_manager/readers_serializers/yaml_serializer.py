@@ -3,6 +3,7 @@ class YamlSerializer:
     A serializer for extracting specific fields from a YAML file and returning them as a dictionary.
 
     """
+
     def __init__(self, yaml_file):
         """
         Initialize a YamlSerializer instance.
@@ -25,5 +26,6 @@ class YamlSerializer:
         return {
             'energy_generator': self.file['energy_generator'],
             'cpu': self.file['cpu'],
-            'variance': self.file['variance']
+            'variance': self.file['variance'],
+            'thresholds': self.file['thresholds']
         }
