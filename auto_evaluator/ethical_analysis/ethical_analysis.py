@@ -34,38 +34,38 @@ class EthicalAnalysis:
 
         if self.features_description:
             LLMSingleton()
-            return feature_importance_all_vals, self.__prompt_feature_ethnicity(feature_importance_all_vals[0])
+            return feature_importance_all_vals, EthicalAnalysis.prompt_feature_ethnicity(self.features_description)
 
         return feature_importance_all_vals
 
 
-    def __prompt_feature_ethnicity(self, feature_importance_vals):
+    @classmethod
+    def prompt_feature_ethnicity(cls,features_description):
         """
-        Initializing the model feature importance method needed inputs.
-        :param feature_importance_vals: the importance values of each feature.
-        :return: the ethical perspective of the top 3 or 5 important features.
+        Initializing the model feature description method needed inputs.
+        :param features_description: the importance values of each feature.
+        :return: a list of the unethical features.
         """
         template_feature_importance = """<<SYS>> \nYou are an assistant tasked with answering machine learning related questions.\n <</SYS>>\n\n\
-        [INST] You MUST answer the question using ONLY one sentence to illustrate your answer:
+        [INST] Answer each question independently. You MUST answer the question using ONLY one sentence to illustrate your answer:
         {question} [/INST]"""
 
-        feature_ethics = {}
-        feature_size = len(feature_importance_vals.keys())
+        feature_unethical = []
 
-        if feature_size > 3:
-            feature_size = 5
+        for curr_feature in features_description.keys():
 
-        for i, curr_feature in enumerate(feature_importance_vals):
-
-            if i >= feature_size:
-                break
-
-            curr_desc = self.features_description[curr_feature]
+            curr_desc = features_description[curr_feature]
 
             question = f"You have an input feature '{curr_feature}' with description: {curr_desc}. \
             This feature is used in training a machine learning model and it is one of the most important \
-            features contributing in predictions. Is this feature '{curr_feature}' ethical and fair to use? and why?"
+            features contributing in predictions. Is this feature '{curr_feature}' ethical and fair to use? and why?\
+            If the input feature is ethical, say the word 'True'. If the input feature is not ethical, say the word 'False'."
 
-            feature_ethics[curr_feature] = LLMSingleton.execute_prompt(template_feature_importance, question=question)
+            print(f"Evaluating the feature {curr_feature} ...")
+            single_feature_ethics = LLMSingleton.execute_prompt(template_feature_importance, question=question)
 
-        return feature_ethics
+            print(single_feature_ethics)
+            if not eval(single_feature_ethics.split()[0][:-1]):
+                feature_unethical.append(curr_feature)
+
+        return feature_unethical
