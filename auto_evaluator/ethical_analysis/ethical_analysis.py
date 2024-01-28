@@ -64,7 +64,6 @@ class EthicalAnalysis:
             print(f"Evaluating the feature {curr_feature} ...")
             single_feature_ethics = LLMSingleton.execute_prompt(template_feature_importance, question=question)
 
-            print(single_feature_ethics)
             if not eval(single_feature_ethics.split()[0][:-1]):
                 feature_unethical.append(curr_feature)
 
