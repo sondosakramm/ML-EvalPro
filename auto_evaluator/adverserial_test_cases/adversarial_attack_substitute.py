@@ -21,7 +21,7 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         """
         art_model = None
         art_attack = None
-        if self.model_type[0] == 'classification':
+        if self.model_type == 'classification':
             print("Classification model ....")
 
             substitute_model = self.__generate_substitute_model(self.train_model_predictions)
@@ -32,7 +32,7 @@ class AdversarialAttackSubstitute(AdversarialAttack):
                         binary_search_steps=1, initial_const=1e-3, abort_early=True, use_resize=False,
                         use_importance=False, nb_parallel=self.num_classes-1, batch_size=1, variable_h=0.2)
 
-        elif self.model_type[0] == 'regression':
+        elif self.model_type == 'regression':
             print("Regression model ....")
 
             num_bins = 5 if self.train_model_predictions.shape[0] > 100 else int(
@@ -62,10 +62,10 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         adversarial_predictions = self.model.predict(adversarial_examples)
         eval_metric = 0
 
-        if self.model_type[0] == "regression":
+        if self.model_type == "regression":
             eval_metric = EvaluatorsFactory.get_evaluator("mape", self.test_model_predictions,
                                                           adversarial_predictions).measure()
-        elif self.model_type[0] == "classification":
+        elif self.model_type == "classification":
             eval_metric = EvaluatorsFactory.get_evaluator("f1 score", self.test_model_predictions,
                                                           adversarial_predictions).measure()
 

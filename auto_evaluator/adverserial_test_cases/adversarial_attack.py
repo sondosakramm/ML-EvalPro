@@ -11,7 +11,7 @@ class AdversarialAttack(ABC):
     """
     An abstract class for generating an adversarial attack.
     """
-    def __init__(self, model, model_type:Tuple[str, str], test_input_features, test_target_features,
+    def __init__(self, model, model_type:str, test_input_features, test_target_features,
                  train_input_features=None, train_target_features=None,
                  significance=0.05, num_classes=None):
         """
@@ -65,7 +65,7 @@ class AdversarialAttack(ABC):
 
         # Get the number of classes from the dataset given if the number of classes is not given
         self.num_classes = num_classes
-        if self.model_type[0] == 'classification' and num_classes is None:
+        if self.model_type == 'classification' and num_classes is None:
             self.num_classes = np.unique(self.train_target_features).shape[0]
 
 
