@@ -45,7 +45,7 @@ class ModelEthical(GdprCompliance):
         return feature_unethical
 
     def __str__(self):
-        summary_str = f'{5 * "*"} Model Ethical {5 * "*"}\n'
+        summary_str = f'{5 * "*"}\tModel Ethical\t{5 * "*"}\n'
         feature_unethical = self.__get_unethical_features()
         for i in range(len(feature_unethical['feature'])):
             summary_str += (f'Feature {feature_unethical["feature"][i]} is not ethical because '
