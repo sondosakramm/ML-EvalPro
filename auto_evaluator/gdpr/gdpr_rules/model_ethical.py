@@ -9,7 +9,7 @@ class ModelEthical(GdprCompliance):
     def __get_unethical_features(self):
 
         """
-        Initializing the model feature description method needed inputs.
+        Get unethical features and the reason of why it's unethical by using LLMs.
         :return: a list of the unethical features.
         """
 

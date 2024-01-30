@@ -40,9 +40,9 @@ class EthicalAnalysis:
 
 
     @classmethod
-    def prompt_feature_ethnicity(cls,features_description):
+    def prompt_feature_ethnicity(cls, features_description):
         """
-        Initializing the model feature description method needed inputs.
+        Prompting ethnicity of the input features.
         :param features_description: the importance values of each feature.
         :return: a list of the unethical features.
         """

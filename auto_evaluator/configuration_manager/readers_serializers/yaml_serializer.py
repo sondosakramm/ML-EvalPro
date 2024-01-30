@@ -27,5 +27,6 @@ class YamlSerializer:
             'energy_generator': self.file['energy_generator'],
             'cpu': self.file['cpu'],
             'variance': self.file['variance'],
-            'thresholds': self.file['thresholds']
+            'thresholds': self.file['thresholds'],
+            'adversarial_attack': self.file['adversarial_attack']
         }

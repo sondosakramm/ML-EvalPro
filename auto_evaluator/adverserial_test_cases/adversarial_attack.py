@@ -1,19 +1,18 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
-
-import pandas as pd
-from art.estimators.regression.scikitlearn import ScikitlearnRegressor
-from art.estimators.classification import SklearnClassifier
 
 import numpy as np
+import pandas as pd
+
+from auto_evaluator.utils.validation import convert_dataframe_to_numpy
+
 
 class AdversarialAttack(ABC):
     """
     An abstract class for generating an adversarial attack.
     """
-    def __init__(self, model, model_type:str, test_input_features, test_target_features,
-                 train_input_features=None, train_target_features=None,
-                 significance=0.05, num_classes=None):
+
+    def __init__(self, model, model_type: str, test_input_features, test_target_features,
+                 train_input_features=None, train_target_features=None, num_classes=None):
         """
         Create an adversarial attack.
         :param model: the model to be tested against adversarial attacks.
@@ -22,35 +21,19 @@ class AdversarialAttack(ABC):
         :param test_target_features: the target feature(s) of the test dataset.
         :param train_input_features: the input features of the train dataset.
         :param train_target_features: the target feature(s) of the train dataset.
-        :param significance: the significance value of the evaluation to the defined threshold.
         :param num_classes: the number of classes of a classification model.
         :return: the created adversarial attack.
         """
         self.model_type = model_type
         self.model = model
-        self.robust = None
+        self.not_robust = None
         self.score = None
 
-        # Transformation to numpy array if the data is pandas.
-        if isinstance(train_input_features, pd.DataFrame):
-            train_input_features = train_input_features.to_numpy()
+        self.test_input_features = convert_dataframe_to_numpy(test_input_features)
+        self.test_target_features = convert_dataframe_to_numpy(test_target_features)
 
-        if isinstance(train_target_features, pd.DataFrame):
-            train_target_features = train_target_features.to_numpy()
-
-        if isinstance(test_input_features, pd.DataFrame):
-            test_input_features = test_input_features.to_numpy()
-
-        if isinstance(test_target_features, pd.DataFrame):
-            test_target_features = test_target_features.to_numpy()
-
-        self.test_input_features = test_input_features
-        self.test_target_features = test_target_features
-
-        self.train_input_features = train_input_features
-        self.train_target_features = train_target_features
-
-        self.significance = significance
+        self.train_input_features = convert_dataframe_to_numpy(train_input_features)
+        self.train_target_features = convert_dataframe_to_numpy(train_target_features)
 
         # Splitting the test data if there is no training data
         if not isinstance(self.train_input_features, np.ndarray):
@@ -67,7 +50,6 @@ class AdversarialAttack(ABC):
         self.num_classes = num_classes
         if self.model_type == 'classification' and num_classes is None:
             self.num_classes = np.unique(self.train_target_features).shape[0]
-
 
     @abstractmethod
     def generate(self) -> np.ndarray:
@@ -87,7 +69,8 @@ class AdversarialAttack(ABC):
         pass
 
     def __str__(self):
-        robust_str = "robust" if self.robust else "not robust"
+        robust_str = "robust" if self.not_robust else "not robust"
 
         return (f'According to the results of evaluating the model predictions of the original examples'
-                f' to the adversarial examples, the model is {robust_str} to adversarial attacks with score {self.score * 100}%')
+                f' to the adversarial examples, the model is {robust_str} to adversarial attacks with score '
+                f'{self.score * 100}%')

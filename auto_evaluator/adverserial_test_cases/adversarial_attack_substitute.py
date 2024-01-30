@@ -22,6 +22,7 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         """
         global art_model
         global art_attack
+        yaml_reader = YamlReader('../config_files/system_config.yaml').get('adversarial_attack')
         if self.model_type == 'classification':
             print("Classification model ....")
 
@@ -29,15 +30,17 @@ class AdversarialAttackSubstitute(AdversarialAttack):
 
             art_model = SklearnClassifier(substitute_model)
 
-            art_attack = ZooAttack(art_model, confidence=0.0, targeted=False, learning_rate=1e-1, max_iter=20,
+            art_attack = ZooAttack(art_model, confidence=0.0, targeted=False,
+                                   learning_rate=float(yaml_reader['learning_rate']),
+                                   max_iter=yaml_reader['max_iter'],
                                    binary_search_steps=1, initial_const=1e-3, abort_early=True, use_resize=False,
                                    use_importance=False, nb_parallel=self.num_classes - 1, batch_size=1, variable_h=0.2)
 
         elif self.model_type == 'regression':
             print("Regression model ....")
 
-            num_bins = 5 if self.train_model_predictions.shape[0] > 100 else int(
-                0.05 * self.train_model_predictions.shape[0])
+            num_bins = yaml_reader['min_num_bins'] if self.train_model_predictions.shape[0] > yaml_reader['min_number_instances'] else int(
+                yaml_reader['num_bins_percentage'] * self.train_model_predictions.shape[0])
             binning_ranges = np.linspace(min(self.train_model_predictions), max(self.train_model_predictions) + 1,
                                          num_bins + 1)
             training_labels_true = np.digitize(self.train_model_predictions, bins=binning_ranges)
@@ -46,9 +49,12 @@ class AdversarialAttackSubstitute(AdversarialAttack):
 
             art_model = SklearnClassifier(substitute_model)
 
-            art_attack = ZooAttack(art_model, confidence=0.0, targeted=False, learning_rate=1e-1, max_iter=20,
+            art_attack = ZooAttack(art_model, confidence=0.0, targeted=False,
+                                   learning_rate=float(yaml_reader['learning_rate']),
+                                   max_iter=yaml_reader['max_iter'],
                                    binary_search_steps=1, initial_const=1e-3, abort_early=True, use_resize=False,
-                                   use_importance=False, nb_parallel=5, batch_size=1, variable_h=0.2)
+                                   use_importance=False, nb_parallel=yaml_reader['nb_parallel'], batch_size=1,
+                                   variable_h=0.2)
 
         return art_attack.generate(self.test_input_features)
 
@@ -61,6 +67,7 @@ class AdversarialAttackSubstitute(AdversarialAttack):
 
         global test_predictions_eval
         global attacks_eval
+        yaml_reader = YamlReader('../config_files/system_config.yaml').get('adversarial_attack')
 
         print("Evaluating the adversarial test cases generated ...")
 
@@ -76,11 +83,12 @@ class AdversarialAttackSubstitute(AdversarialAttack):
                                                            self.adversarial_predictions).measure()
             test_predictions_eval = EvaluatorsFactory.get_evaluator("f1 score", self.test_target_features,
                                                                     self.test_model_predictions).measure()
-        self.robust = abs(attacks_eval - test_predictions_eval) < self.significance
-        if self.robust:
-            return True
-        else:
+
+        self.not_robust = np.any(abs(self.adversarial_predictions - self.test_model_predictions) > yaml_reader['threshold'])
+        if self.not_robust:
             return False
+        else:
+            return True
 
     def __generate_substitute_model(self, predictions):
         """

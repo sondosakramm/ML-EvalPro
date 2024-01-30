@@ -7,11 +7,11 @@ def check_consistent_length(y_true, y_pred):
         raise ValueError("Input arrays must have the same length.")
 
 
-def check_numpy(data):
+def convert_dataframe_to_numpy(data):
     try:
-        if not isinstance(data, np.ndarray):
+        if isinstance(data, pd.DataFrame):
             return data.to_numpy()
-        return data
+        if isinstance(data, np.ndarray):
+            return data
     except (TypeError, ValueError) as e:
         print(f"An error occurred: {e}")
-        raise e

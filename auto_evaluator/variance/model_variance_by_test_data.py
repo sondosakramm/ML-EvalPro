@@ -1,6 +1,6 @@
 import numpy as np
 
-from auto_evaluator.utils.validation import check_numpy
+from auto_evaluator.utils.validation import convert_dataframe_to_numpy
 from auto_evaluator.variance.features_variance.categorical_features import CategoricalFeatures
 from auto_evaluator.variance.features_variance.numerical_features import NumericalFeatures
 from auto_evaluator.variance.model_var.model_variance import ModelVariance
@@ -39,7 +39,7 @@ class ModelVarianceByTestData(ModelVariance):
         """
         self.model_avg_error = []
         self.X_test_with_features_name = X_test
-        super().__init__(model, check_numpy(X_test), check_numpy(y_test), None, None,
+        super().__init__(model, convert_dataframe_to_numpy(X_test), convert_dataframe_to_numpy(y_test), None, None,
                          problem_type, metric)
 
 
