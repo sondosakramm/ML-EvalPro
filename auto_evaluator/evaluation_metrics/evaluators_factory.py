@@ -14,6 +14,7 @@ from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.mape import
 from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.mean_bias_deviation import MeanBiasDeviation
 from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.medae import MEDAE
 from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.r_square_error import RSquare
+from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.reliability_diagram import Calibration
 from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.rmse import RMSE
 
 
@@ -49,8 +50,10 @@ class EvaluatorsFactory:
                 return AUC(target, prediction, num_of_classes, n_bins)
             elif evaluation_metric == 'expected calibration error':
                 return ECEMetric(target, prediction, num_of_classes, n_bins)
-            elif evaluation_metric == 'reliability evaluation':
+            elif evaluation_metric == 'classification reliability evaluation':
                 return ReliabilityDiagram(target, prediction, num_of_classes, n_bins, display)
+            elif evaluation_metric == 'regression reliability evaluation':
+                return Calibration(target, prediction, n_bins)
             elif evaluation_metric == 'accuracy':
                 return Accuracy(target, prediction, num_of_classes)
             elif evaluation_metric == 'cross entropy loss':
