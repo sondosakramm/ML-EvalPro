@@ -10,6 +10,6 @@ def check_feature_type(feature: pd.Series) -> FeatureTypeEnum:
     :param feature: the input feature.
     :return: An enum indicating the feature type.
     """
-    if is_string_dtype(feature) or feature.unique().size < feature.size:
+    if is_string_dtype(feature) or feature.unique().size < int(feature.size / 2):
         return FeatureTypeEnum.CATEGORICAL
     return FeatureTypeEnum.NUMERICAL

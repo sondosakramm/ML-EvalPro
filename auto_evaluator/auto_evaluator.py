@@ -40,38 +40,51 @@ class AutoEvaluator:
         self.train_predictions = None if self.train_target is None \
             else self.model_pipeline.predict(self.train_dataset)
 
+        self.test_predictions_proba = None if self.model_type == "regression"\
+            else self.model_pipeline.predict_proba(self.test_dataset)
+
+        self.train_predictions_proba = None if self.model_type == "regression" or self.train_dataset is None \
+            else self.model_pipeline.predict_proba(self.train_dataset)
+
         self.num_classes = -1 if self.model_type == "regression" \
             else get_num_classes(self.model_type, self.test_target)
 
         self.features_description = features_description
 
-    def __get_evaluation_metrics(self, target, predictions):
+    def __get_evaluation_metrics(self, target, predictions, predictions_proba):
         """
         Calculating the evaluation metrics.
         :param target: the target true values.
         :param predictions: the target prediction values.
+        :param predictions: the target prediction probability values of each class (for classification only).
         :return: A dictionary of the values.
         """
         print("Evaluating the model using the input evaluation metrics ...")
         res = {}
         for metric in self.evaluation_metrics:
-            if self.model_type == 'regression':
-                res[metric] = EvaluatorsFactory.get_evaluator(metric, target, predictions).measure()
-            elif self.model_type == 'classification':
+            # if self.model_type == 'regression':
+            #     res[metric] = EvaluatorsFactory.get_evaluator(metric, target, predictions).measure()
+            # elif self.model_type == 'classification':
+            if metric == 'expected calibration error' or metric == 'auc':
                 res[metric] = EvaluatorsFactory.get_evaluator(metric, target,
-                                                              predictions, num_of_classes=self.num_classes).measure()
+                                                              predictions_proba,
+                                                              num_of_classes=self.num_classes).measure()
+            else:
+                res[metric] = EvaluatorsFactory.get_evaluator(metric, target,
+                                                              predictions,
+                                                              num_of_classes=self.num_classes).measure()
         return res
 
-    def __get_reliability_diagram(self, data):
+    def __get_reliability_diagram(self):
         """
         Getting the reliability diagram.
-        :param data: the target true dataset.
         :return: the reliability diagram values to be displayed in the graph.
         """
         print("Extracting the model reliability diagram ...")
         return EvaluatorsFactory.get_evaluator(f"{self.model_type} reliability evaluation",
                                                self.test_target,
-                                               self.model_pipeline.predict_proba(data),
+                                               self.test_predictions if self.model_type == 'regression' else
+                                               self.test_predictions_proba,
                                                num_of_classes=self.num_classes).measure()
 
     def __get_environmental_impact(self) -> dict:
@@ -191,12 +204,12 @@ class AutoEvaluator:
         :return: a dictionary of all the evaluation values in auto evaluator.
         """
         return {
-            'evaluation_metrics_test': self.__get_evaluation_metrics(self.test_target, self.test_predictions),
+            'evaluation_metrics_test': self.__get_evaluation_metrics(self.test_target, self.test_predictions, self.test_predictions_proba),
 
             'evaluation_metrics_train': {} if self.train_dataset is None
-            else self.__get_evaluation_metrics(self.train_target, self.train_predictions),
+            else self.__get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_proba),
 
-            'reliability_diagram': self.__get_reliability_diagram(self.test_dataset),
+            'reliability_diagram': self.__get_reliability_diagram(),
 
             'environmental_impact': self.__get_environmental_impact(),
 

@@ -13,4 +13,4 @@ class TPR(ClassClassification):
         Evaluating the model with TPR.
         :return: the TPR value.
         """
-        return recall_score(self.target, self.prediction)
+        return recall_score(self.target, self.prediction, average='micro')
