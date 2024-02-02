@@ -4,7 +4,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 
-from auto_evaluator.evaluation_metrics.regression.evaluation_metrics.mape import MAPE
+from auto_evaluator.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 
 
 class FeatureBias(ABC):
@@ -12,22 +12,22 @@ class FeatureBias(ABC):
     An abstract class for input feature bias.
     """
 
-    def __init__(self, model, target: pd.Series, features: pd.DataFrame, feature_name: str,
-                 performance_metric: str = 'accuracy', significance: float = 0.05):
+    def __init__(self, model, model_type: str, target: pd.Series, features: pd.DataFrame,
+                 feature_name: str, significance: float = 0.05):
         """
         Initializing the feature bias needed inputs.
         :param model: the model.
+        :param model_type: the model type.
         :param target: the target prediction values.
         :param features: the input feature values.
         :param feature_name: the input feature name.
-        :param performance_metric: the performance metric used for measuring the bias.
         :param significance: the significance value to measure bias.
         """
         self.model = model
+        self.model_type = model_type
         self.target = target
         self.features = features
         self.feature_name = feature_name
-        self.performance_metric = performance_metric
         self.significance = significance
 
     @abstractmethod
@@ -49,7 +49,7 @@ class FeatureBias(ABC):
         eval_metrics = self.__calculate_metrics(categorical_feature)
         pairwise_diff, avg_abs_performance = FeatureBias._calculate_average_absolute_performance(eval_metrics)
 
-        return self.feature_name, avg_abs_performance, avg_abs_performance >= self.significance
+        return [self.feature_name, avg_abs_performance, avg_abs_performance >= self.significance]
 
     def __calculate_metrics(self, categorical_feature: pd.Series) -> list:
         """
@@ -65,9 +65,13 @@ class FeatureBias(ABC):
             category_data_index = category_data.index.tolist()
             category_predictions = self.model.predict(category_data)
 
-            # TODO: Replacing with a evaluation metric factory.
-            eval_metrics.append(MAPE(self.target[category_data_index].tolist(), category_predictions).measure() / 100)
-            # eval_metrics.append(Accuracy(self.target[category_data_index].tolist(), category_predictions).measure())
+            if self.model_type == 'regression':
+                eval_metrics.append(EvaluatorsFactory.get_evaluator('mape', self.target[category_data_index].tolist(),
+                                                                    category_predictions).measure() / 100)
+            elif self.model_type == 'classification':
+                eval_metrics.append(
+                    EvaluatorsFactory.get_evaluator('accuracy', self.target[category_data_index].tolist(),
+                                                    category_predictions).measure())
 
         return eval_metrics
 

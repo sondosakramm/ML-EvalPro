@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from auto_evaluator.bias.feature_bias_factory import FeatureBiasFactory
@@ -9,20 +10,20 @@ class ModelBias:
     A class for measuring the model bias.
     """
 
-    def __init__(self, model, data: pd.DataFrame, target: pd.Series, performance_metric='accuracy',
+    def __init__(self, model, model_type: str, data: pd.DataFrame, target: pd.Series,
                  significance: float = 0.05):
         """
         Initializing the model bias needed inputs.
         :param model: the model.
+        :param model_type: the model type.
         :param data: the dataset containing all the features.
         :param target: the target values.
-        :param performance_metric: the performance metric used for measuring the bias.
         :param significance: the significance value to measure bias.
         """
         self.model = model
+        self.model_type = model_type
         self.data = data
         self.target = target
-        self.performance_metric = performance_metric
         self.significance = significance
 
     def __call__(self, *args, **kwargs):
@@ -34,22 +35,25 @@ class ModelBias:
         for feature_name in features_names:
             feature_type = check_feature_type(self.data[feature_name])
 
-            bias = FeatureBiasFactory.create(feature_type.value, self.model, self.target, self.data,
-                                             feature_name, performance_metric=self.performance_metric,
+            bias = FeatureBiasFactory.create(feature_type.value, self.model, self.model_type,
+                                             self.target, self.data, feature_name,
                                              significance=self.significance)
-            features_bias.append(bias.check_bias())
+            curr_bias = bias.check_bias()
+            if curr_bias[2]:
+                features_bias.append(curr_bias)
 
+        self.features_bias = features_bias
         return features_bias
 
     def __str__(self):
-        features_bias = self.__call__()
-        results_string = ("The model bias results state the following according to each feature:\n"
-                          "---------------------------------------------------------------------\n")
+        if len(self.features_bias) == 0:
+            return "There is no bias features in this model."
 
-        for bias in features_bias:
-            biased = "biased"
-            if not bias[2]:
-                biased = "not" + biased
+        features_bias_np = np.array(self.features_bias)
 
-            results_string += f"The model is '{biased}' for the feature '{bias[0]}' with value {bias[1]}\n"
-        return results_string
+        ', '.join(map(str, features_bias_np[:, 0]))
+        features_names = ', '.join(map(str, features_bias_np[:, 0]))
+        features_values = ', '.join(map(str, features_bias_np[:, 1]))
+
+        return (f"By calculating the predictions of different possible values of each feature,"
+                f" the biased features are {features_names} by the values {features_values} respectively.")

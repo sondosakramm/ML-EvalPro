@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from auto_evaluator.adverserial_test_cases.adversarial_attack_substitute import AdversarialAttackSubstitute
+from auto_evaluator.bias.model_bias import ModelBias
 from auto_evaluator.carbon.carbon_emission.carbon import Carbon
 from auto_evaluator.carbon.carbon_emission.carbon_calculator import CarbonCalculator
 from auto_evaluator.carbon.inference_time.inference_time import InferenceTime
@@ -131,6 +132,20 @@ class AutoEvaluator:
 
         return pd.DataFrame(adv_test_cases_instances, columns=dataset_columns)
 
+    def __get_model_bias(self) -> dict:
+        """
+        Calculating the features bias in the model
+        :return: a dictionary of the biased features and summary in the model.
+        """
+        model_bias = ModelBias(self.model_pipeline, self.model_type, self.test_dataset, self.test_target)
+        biased_features = model_bias()
+        biased_features_summary = model_bias.__str__()
+
+        return {
+            "biased_features": np.array(biased_features)[:, 0],
+            "bias summary": biased_features_summary
+        }
+
     def get_evaluations(self) -> dict:
         """
         Getting all the evaluation values in auto evaluator.
@@ -146,5 +161,8 @@ class AutoEvaluator:
 
             'environmental_impact': self.__get_environmental_impact(),
 
+            'model_bias': self.__get_model_bias(),
+
             'adversarial_test_cases': self.__get_adversarial_test_cases()
+
         }
