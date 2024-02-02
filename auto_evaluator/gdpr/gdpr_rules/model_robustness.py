@@ -11,7 +11,7 @@ class ModelRobustness(GdprCompliance):
         """
         self.adversarial_attacks = AdversarialAttackSubstitute(self.model, self.problem_type, self.X_test, self.y_test)
         self.attacks = self.adversarial_attacks.generate()
-        return self.adversarial_attacks.evaluate_robustness(self.attacks)
+        return self.adversarial_attacks.evaluate_robustness(self.model.predict(self.attacks))
 
 
     def __str__(self):

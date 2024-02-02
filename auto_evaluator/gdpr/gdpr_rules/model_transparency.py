@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import shap
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, BaggingClassifier, BaggingRegressor, \
@@ -50,8 +52,8 @@ class ModelTransparency(GdprCompliance):
 
     def __calculate_avg_entropy(self):
         """Calculate the average entropy of SHAP values for the model predictions."""
-        explainer = shap.Explainer(self.model)
-        shap_values = explainer.shap_values(self.X_test)
+        explainer = shap.Explainer(self.model.predict, shap.utils.sample(self.X_test, int(self.X_test.shape[0] * 0.1)))
+        shap_values = explainer(self.X_test).values
         normalized_shap_values = shap_values / np.sum(np.abs(shap_values))
         epsilon = 1e-10  # To avoid Zero Logarithm problem "-inf"
         normalized_shap_values = np.maximum(normalized_shap_values, epsilon)
@@ -61,7 +63,10 @@ class ModelTransparency(GdprCompliance):
     def __check_significance(self):
         """Check if the average entropy is below a predefined significance threshold."""
         self.avg_entropy = self.__calculate_avg_entropy()
-        significant = YamlReader("../config_files/system_config.yaml").get("thresholds")["shap_significance"]
+        significant = YamlReader(os.path.join(os.path.curdir,
+                                              "auto_evaluator",
+                                              "config_files",
+                                              "system_config.yaml")).get("thresholds")["shap_significance"]
         if self.avg_entropy < significant:
             return True
         return False
@@ -77,7 +82,8 @@ class ModelTransparency(GdprCompliance):
 
         complex_models = [RandomForestClassifier, RandomForestRegressor, BaggingClassifier, BaggingRegressor,
                           AdaBoostClassifier, AdaBoostRegressor, GradientBoostingClassifier, GradientBoostingRegressor,
-                          XGBRegressor, StackingClassifier, StackingRegressor]
+                          XGBRegressor,
+                          StackingClassifier, StackingRegressor]
         self.summary_str += f'{5 * "*"}\tModel Explain-ability/Interpretability\t{5 * "*"}\n'
         try:
             if any(isinstance(self.model, model_type) for model_type in explainable_models):

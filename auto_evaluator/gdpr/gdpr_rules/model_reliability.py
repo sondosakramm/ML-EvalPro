@@ -4,7 +4,7 @@ from auto_evaluator.gdpr.gdpr_compliance import GdprCompliance
 
 class ModelReliability(GdprCompliance):
     def __str__(self):
-        self.prediction = self.model.predict(self.X_test)
+        self.prediction = self.model.predict_proba(self.X_test)
         summary_str = f'{5*"*"}\tModel Reliability\t{5*"*"}\n'
         if self.problem_type == 'classification':
             evaluator = EvaluatorsFactory.get_evaluator("expected calibration error",

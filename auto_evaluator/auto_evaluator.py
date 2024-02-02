@@ -7,6 +7,10 @@ from auto_evaluator.carbon.carbon_emission.carbon import Carbon
 from auto_evaluator.carbon.carbon_emission.carbon_calculator import CarbonCalculator
 from auto_evaluator.carbon.inference_time.inference_time import InferenceTime
 from auto_evaluator.ethical_analysis.ethical_analysis import EthicalAnalysis
+from auto_evaluator.gdpr.gdpr_rules.model_ethical import ModelEthical
+from auto_evaluator.gdpr.gdpr_rules.model_reliability import ModelReliability
+from auto_evaluator.gdpr.gdpr_rules.model_robustness import ModelRobustness
+from auto_evaluator.gdpr.gdpr_rules.model_transparency import ModelTransparency
 from auto_evaluator.utils.validate_model_type import check_model_type, get_num_classes
 from auto_evaluator.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 from auto_evaluator.variance.model_variance_by_test_data import ModelVarianceByTestData
@@ -132,7 +136,7 @@ class AutoEvaluator:
     def __get_model_variance(self):
         """
         Calculating the model variance.
-        :return:
+        :return: the model variance and its summary.
         """
         print("Evaluating the model variance ...")
         variance_res = {}
@@ -174,6 +178,7 @@ class AutoEvaluator:
             AdversarialAttackSubstitute(self.model_pipeline, self.model_type,
                                         self.test_dataset, self.test_target,
                                         num_classes=self.num_classes) if self.train_target is None else
+
             AdversarialAttackSubstitute(self.model_pipeline, self.model_type,
                                         self.test_dataset, self.test_target,
                                         train_input_features=self.train_dataset,
@@ -199,14 +204,42 @@ class AutoEvaluator:
 
         return pd.DataFrame(adv_test_cases_instances, columns=dataset_columns)
 
-    # TODO
+
     def __get_model_gdpr_compliance(self):
         """
-        Calculating the model GDPR Compliance.
-        :return:
+        Evaluating the model GDPR Compliance.
+        :return: the model GDPR Compliance summary.
         """
         print("Evaluating the model GDPR Compliance ...")
-        return None
+
+        model_ethical = 'Cannot evaluate model ethnicity due to the unavailability of the features.' if (
+                self.features_description is None) \
+            else ModelEthical(features_description=self.features_description).__str__()
+
+        model_reliability = ModelReliability(model=self.model_pipeline,
+                                             X_test=self.test_dataset,
+                                             y_test=self.test_target,
+                                             problem_type=self.model_type,
+                                             num_of_classes=self.num_classes).__str__()
+
+        model_robustness = ModelRobustness(model=self.model_pipeline,
+                                           X_test=self.test_dataset,
+                                           y_test=self.test_target,
+                                           problem_type=self.model_type).__str__()
+
+        model_transparency = ModelTransparency(model=self.model_pipeline,
+                                               X_test=self.test_dataset,
+                                               y_test=self.test_target,
+                                               problem_type=self.model_type).__str__()
+
+        return model_ethical + '\n' + model_reliability + '\n' + model_robustness + '\n' + model_transparency
+
+    def __get_machine_unlearning_ability(self):
+        """
+        Evaluating the model machine unlearning ability.
+        :return: the model machine unlearning ability summary.
+        """
+        return 'Testing machine unlearning ability is not Supported yet!'
 
     def get_evaluations(self) -> dict:
         """
@@ -232,6 +265,8 @@ class AutoEvaluator:
 
             'adversarial_test_cases': self.__get_adversarial_test_cases(),
 
-            'gdpr_compliance': self.__get_model_gdpr_compliance()
+            'gdpr_compliance': self.__get_model_gdpr_compliance(),
+
+            'machine_unlearning': self.__get_machine_unlearning_ability()
 
         }
