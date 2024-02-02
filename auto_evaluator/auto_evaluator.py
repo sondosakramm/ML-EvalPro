@@ -6,6 +6,7 @@ from auto_evaluator.bias.model_bias import ModelBias
 from auto_evaluator.carbon.carbon_emission.carbon import Carbon
 from auto_evaluator.carbon.carbon_emission.carbon_calculator import CarbonCalculator
 from auto_evaluator.carbon.inference_time.inference_time import InferenceTime
+from auto_evaluator.ethical_analysis.ethical_analysis import EthicalAnalysis
 from auto_evaluator.utils.validate_model_type import check_model_type, get_num_classes
 from auto_evaluator.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 
@@ -51,6 +52,7 @@ class AutoEvaluator:
         :param predictions: the target prediction values.
         :return: A dictionary of the values.
         """
+        print("Evaluating the model using the input evaluation metrics ...")
         res = {}
         for metric in self.evaluation_metrics:
             if self.model_type == 'regression':
@@ -66,7 +68,9 @@ class AutoEvaluator:
         :param data: the target true dataset.
         :return: the reliability diagram values to be displayed in the graph.
         """
-        return EvaluatorsFactory.get_evaluator(f"{self.model_type} reliability evaluation", self.test_target,
+        print("Extracting the model reliability diagram ...")
+        return EvaluatorsFactory.get_evaluator(f"{self.model_type} reliability evaluation",
+                                               self.test_target,
                                                self.model_pipeline.predict_proba(data),
                                                num_of_classes=self.num_classes).measure()
 
@@ -75,6 +79,7 @@ class AutoEvaluator:
         Getting the environmental impact values.
         :return: a dictionary of the time inference and the carbon emission values.
         """
+        print("Evaluating the model environmental impact ...")
         inference_time = InferenceTime(self.model_pipeline, self.test_dataset)
         inference_time_val = (inference_time.calc_inference_time_hours()
                               + inference_time.calc_inference_time_minutes()
@@ -97,12 +102,51 @@ class AutoEvaluator:
             'carbon_summary': carbon_emission_summary
         }
 
+    def __get_model_bias(self) -> dict:
+        """
+        Calculating the features bias in the model
+        :return: a dictionary of the biased features and summary in the model.
+        """
+        print("Evaluating the model bias ...")
+        model_bias = ModelBias(self.model_pipeline, self.model_type, self.test_dataset, self.test_target)
+        biased_features = model_bias()
+        biased_features_summary = model_bias.__str__()
+
+        return {
+            "biased_features": np.array(biased_features)[:, 0],
+            "bias_summary": biased_features_summary
+        }
+
+    # TODO
+    def __get_model_variance(self):
+        """
+        Calculating the model variance.
+        :return:
+        """
+        print("Evaluating the model variance ...")
+        return None
+
+    def __get_feature_importance(self) -> dict:
+        """
+        Calculating the feature importance values in evaluating the model.
+        :return: a dictionary of the biased features and summary in the model.
+        """
+        print("Evaluating the model ethical issues according to the features importance ...")
+        ethical_analysis = EthicalAnalysis(self.model_pipeline, self.test_dataset, self.features_description)
+        feature_importance, unethical_features = ethical_analysis()
+
+        return {
+            'feature_importance': feature_importance,
+            'feature_ethnicity': unethical_features
+        }
+
     def __get_adversarial_test_cases(self) -> pd.DataFrame:
         """
         Getting the adversarial test cases of the model.
         :return: a data frame containing the adversarial test cases,
          the expected output, and the model output.
         """
+        print("Generating the model adversarial test cases ...")
         adversarial_attack = (
             AdversarialAttackSubstitute(self.model_pipeline, self.model_type,
                                         self.test_dataset, self.test_target,
@@ -132,19 +176,14 @@ class AutoEvaluator:
 
         return pd.DataFrame(adv_test_cases_instances, columns=dataset_columns)
 
-    def __get_model_bias(self) -> dict:
+    # TODO
+    def __get_model_gdpr_compliance(self):
         """
-        Calculating the features bias in the model
-        :return: a dictionary of the biased features and summary in the model.
+        Calculating the model GDPR Compliance.
+        :return:
         """
-        model_bias = ModelBias(self.model_pipeline, self.model_type, self.test_dataset, self.test_target)
-        biased_features = model_bias()
-        biased_features_summary = model_bias.__str__()
-
-        return {
-            "biased_features": np.array(biased_features)[:, 0],
-            "bias summary": biased_features_summary
-        }
+        print("Evaluating the model GDPR Compliance ...")
+        return None
 
     def get_evaluations(self) -> dict:
         """
@@ -163,6 +202,12 @@ class AutoEvaluator:
 
             'model_bias': self.__get_model_bias(),
 
-            'adversarial_test_cases': self.__get_adversarial_test_cases()
+            'model_variance': self.__get_model_variance(),
+
+            'ethical_analysis': self.__get_feature_importance(),
+
+            'adversarial_test_cases': self.__get_adversarial_test_cases(),
+
+            'gdpr_compliance': self.__get_model_gdpr_compliance()
 
         }
