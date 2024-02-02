@@ -1,7 +1,8 @@
+import os
 from abc import abstractmethod, ABC
 from auto_evaluator.configuration_manager.configuration_reader.yaml_reader import YamlReader
-from auto_evaluator.evaluation_metrics.classification.class_evaluation.accuracy import Accuracy
-from auto_evaluator.evaluation_metrics.regression.mae import MAE
+
+from auto_evaluator.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 
 
 class ModelVariance(ABC):
@@ -60,7 +61,8 @@ class ModelVariance(ABC):
             - metric : str or object, optional (default='MAE')
                 The evaluation metric to be used.
         """
-        self.yaml_reader = YamlReader('../config_files/system_config.yaml')
+        self.yaml_reader = YamlReader(os.path.join(os.path.curdir, "auto_evaluator",
+                                                   "config_files", "system_config.yaml"))
         self.model = model
         self.X_test = X_test
         self.y_test = y_test
@@ -93,8 +95,8 @@ class ModelVariance(ABC):
             - float: The evaluation metric error.
         """
         if self.problem_type == 'classification':
-            # TODO: Use evaluation metric factory based on metric param.
-            return Accuracy(y, predictions).measure()
+            return EvaluatorsFactory.get_evaluator('accuracy', y,
+                                                   predictions).measure()
         elif self.problem_type == 'regression':
-            # TODO: Use evaluation metric factory based on metric param.
-            return MAE(y, predictions).measure()
+            return EvaluatorsFactory.get_evaluator('mae', y,
+                                                   predictions).measure()

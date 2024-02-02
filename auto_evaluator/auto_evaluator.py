@@ -9,6 +9,8 @@ from auto_evaluator.carbon.inference_time.inference_time import InferenceTime
 from auto_evaluator.ethical_analysis.ethical_analysis import EthicalAnalysis
 from auto_evaluator.utils.validate_model_type import check_model_type, get_num_classes
 from auto_evaluator.evaluation_metrics.evaluators_factory import EvaluatorsFactory
+from auto_evaluator.variance.model_variance_by_test_data import ModelVarianceByTestData
+from auto_evaluator.variance.model_variance_by_train_test_data import ModelVarianceByTrainTestData
 
 
 class AutoEvaluator:
@@ -40,7 +42,7 @@ class AutoEvaluator:
         self.train_predictions = None if self.train_target is None \
             else self.model_pipeline.predict(self.train_dataset)
 
-        self.test_predictions_proba = None if self.model_type == "regression"\
+        self.test_predictions_proba = None if self.model_type == "regression" \
             else self.model_pipeline.predict_proba(self.test_dataset)
 
         self.train_predictions_proba = None if self.model_type == "regression" or self.train_dataset is None \
@@ -62,9 +64,6 @@ class AutoEvaluator:
         print("Evaluating the model using the input evaluation metrics ...")
         res = {}
         for metric in self.evaluation_metrics:
-            # if self.model_type == 'regression':
-            #     res[metric] = EvaluatorsFactory.get_evaluator(metric, target, predictions).measure()
-            # elif self.model_type == 'classification':
             if metric == 'expected calibration error' or metric == 'auc':
                 res[metric] = EvaluatorsFactory.get_evaluator(metric, target,
                                                               predictions_proba,
@@ -130,14 +129,25 @@ class AutoEvaluator:
             "bias_summary": biased_features_summary
         }
 
-    # TODO
     def __get_model_variance(self):
         """
         Calculating the model variance.
         :return:
         """
         print("Evaluating the model variance ...")
-        return None
+        variance_res = {}
+        if self.train_target is not None:
+            variance_train = ModelVarianceByTrainTestData(self.model_pipeline, self.test_dataset, self.test_target,
+                                                          self.train_dataset, self.train_target, self.model_type)
+            variance_res['variance_train_value'] = variance_train.calculate_variance()
+            variance_res['variance_train_summary'] = variance_train.__str__()
+
+        variance_test = ModelVarianceByTestData(self.model_pipeline, self.test_dataset, self.test_target,
+                                                self.model_type)
+        variance_test.calculate_variance()
+        variance_res['high_variant_features'] = variance_test.get_diff()
+        variance_res['variance_features_summary'] = variance_test.__str__()
+        return variance_res
 
     def __get_feature_importance(self) -> dict:
         """
@@ -204,7 +214,8 @@ class AutoEvaluator:
         :return: a dictionary of all the evaluation values in auto evaluator.
         """
         return {
-            'evaluation_metrics_test': self.__get_evaluation_metrics(self.test_target, self.test_predictions, self.test_predictions_proba),
+            'evaluation_metrics_test': self.__get_evaluation_metrics(self.test_target, self.test_predictions,
+                                                                     self.test_predictions_proba),
 
             'evaluation_metrics_train': {} if self.train_dataset is None
             else self.__get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_proba),

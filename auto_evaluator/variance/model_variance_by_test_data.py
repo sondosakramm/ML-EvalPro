@@ -16,6 +16,7 @@ class ModelVarianceByTestData(ModelVariance):
         X_test_with_features_name:
              array-like or pd.DataFrame: to save the original X_test.
     """
+
     def __init__(self, model, X_test, y_test, problem_type='regression', metric='MAE'):
         """
         Initialize a ModelVarianceByTestData instance.
@@ -42,7 +43,6 @@ class ModelVarianceByTestData(ModelVariance):
         super().__init__(model, convert_dataframe_to_numpy(X_test), convert_dataframe_to_numpy(y_test), None, None,
                          problem_type, metric)
 
-
     def __get_numerical(self, feature_index, string_flag):
         """Get X_test after doing small perturbations on numerical features"""
         num = NumericalFeatures(self.X_test, feature_index, string_flag)
@@ -51,13 +51,11 @@ class ModelVarianceByTestData(ModelVariance):
                                    self.calculate_errors(self.y_test, self.model.predict(step_subtracted_arr))], axis=0)
         self.model_avg_error.append(avg_predictions)
 
-
     def __get_categorical(self, feature_index):
         """Get X_test after doing small perturbations on categorical features"""
         cat = CategoricalFeatures(self.X_test, feature_index)
         cat_arr = cat.apply()
         self.model_avg_error.append(self.calculate_errors(self.y_test, self.model.predict(cat_arr)))
-
 
     def calculate_variance(self):
         """
@@ -74,8 +72,7 @@ class ModelVarianceByTestData(ModelVariance):
                 else:
                     self.__get_categorical(feature_index)
 
-
-    def __get_diff(self):
+    def get_diff(self):
         """
         Get the difference between X_test predictions error and each feature prediction error after perturbations.
 
@@ -89,14 +86,13 @@ class ModelVarianceByTestData(ModelVariance):
                 exceeds_threshold.append(i)
         return exceeds_threshold
 
-
     def __str__(self):
         """
         return:
          str: a summary about detecting high variance prediction or not.
         """
         summary = f''
-        features_exceed_threshold = self.__get_diff()
+        features_exceed_threshold = self.get_diff()
         if len(features_exceed_threshold) > 0:
             summary += f'High predictions variance is detected when doing small perturbations on features '
             for feature_index in features_exceed_threshold:

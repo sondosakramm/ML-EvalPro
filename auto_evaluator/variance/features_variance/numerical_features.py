@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 
 from auto_evaluator.configuration_manager.configuration_reader.yaml_reader import YamlReader
@@ -7,6 +9,7 @@ class NumericalFeatures:
     """
         A class for handling numerical feature manipulation based on variance analysis.
     """
+
     def __init__(self, X_test, feature_index, string_flag):
         """
         Initialize a NumericalFeatures instance.
@@ -25,7 +28,8 @@ class NumericalFeatures:
         self.X_test = X_test
         self.feature_index = feature_index
         self.string_flag = string_flag
-        self.__yaml_reader = YamlReader('../config_files/system_config.yaml')
+        self.__yaml_reader = YamlReader(os.path.join(os.path.curdir, "auto_evaluator",
+                                                     "config_files", "system_config.yaml"))
 
     def apply(self):
         """
