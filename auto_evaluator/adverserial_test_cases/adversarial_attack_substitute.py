@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from art.attacks.evasion.zoo import ZooAttack
 from art.estimators.classification.scikitlearn import SklearnClassifier
@@ -7,13 +9,19 @@ from sklearn.pipeline import make_pipeline
 
 from auto_evaluator.adverserial_test_cases.adversarial_attack import AdversarialAttack
 from auto_evaluator.configuration_manager.configuration_reader.yaml_reader import YamlReader
-from auto_evaluator.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 
 
 class AdversarialAttackSubstitute(AdversarialAttack):
     """
     A class for generating an adversarial attack by a substitution model.
     """
+
+    def __init__(self, model, model_type: str, test_input_features, test_target_features,
+                 train_input_features=None, train_target_features=None, num_classes=None):
+
+        super().__init__(model, model_type, test_input_features,
+                         test_target_features, train_input_features,
+                         train_target_features, num_classes)
 
     def generate(self) -> np.ndarray:
         """
@@ -22,10 +30,9 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         """
         global art_model
         global art_attack
-        yaml_reader = YamlReader('../config_files/system_config.yaml').get('adversarial_attack')
+        yaml_reader = YamlReader(os.path.join(os.path.curdir, "auto_evaluator",
+                                              "config_files", "system_config.yaml")).get('adversarial_attack')
         if self.model_type == 'classification':
-            print("Classification model ....")
-
             substitute_model = self.__generate_substitute_model(self.train_model_predictions)
 
             art_model = SklearnClassifier(substitute_model)
@@ -37,9 +44,8 @@ class AdversarialAttackSubstitute(AdversarialAttack):
                                    use_importance=False, nb_parallel=self.num_classes - 1, batch_size=1, variable_h=0.2)
 
         elif self.model_type == 'regression':
-            print("Regression model ....")
-
-            num_bins = yaml_reader['min_num_bins'] if self.train_model_predictions.shape[0] > yaml_reader['min_number_instances'] else int(
+            num_bins = yaml_reader['min_num_bins'] if self.train_model_predictions.shape[0] > yaml_reader[
+                'min_number_instances'] else int(
                 yaml_reader['num_bins_percentage'] * self.train_model_predictions.shape[0])
             binning_ranges = np.linspace(min(self.train_model_predictions), max(self.train_model_predictions) + 1,
                                          num_bins + 1)
@@ -58,37 +64,33 @@ class AdversarialAttackSubstitute(AdversarialAttack):
 
         return art_attack.generate(self.test_input_features)
 
-    def evaluate_robustness(self, adversarial_examples):
+    def get_adversarial_test_cases(self, adversarial_examples, adversarial_predictions):
+        """
+        Evaluate the model predictions and the adversarial test cases.
+        :param adversarial_examples: the generated adversarial examples.
+        :param adversarial_predictions: the predictions of the generated adversarial examples.
+        :return: the adversarial test cases after evaluation.
+        """
+        not_robust_predictions = (abs(adversarial_predictions - self.test_model_predictions)
+                                  > np.std(self.test_model_predictions))
+
+        not_robust_adversarial_examples = adversarial_examples[not_robust_predictions]
+        not_robust_true_values = self.test_model_predictions[not_robust_predictions]
+        not_robust_predictions = adversarial_predictions[not_robust_predictions]
+
+        return not_robust_adversarial_examples, not_robust_true_values, not_robust_predictions
+
+    def evaluate_robustness(self, adversarial_predictions):
         """
         Evaluate the model robustness to adversarial attacks.
-        :param adversarial_examples: the generated adversarial examples.
+        :param adversarial_predictions: the predictions of the generated adversarial examples.
         :return: a flag indicating whether the model is robust to adversarial attacks.
         """
-
-        global test_predictions_eval
-        global attacks_eval
-        yaml_reader = YamlReader('../config_files/system_config.yaml').get('adversarial_attack')
-
         print("Evaluating the adversarial test cases generated ...")
+        self.not_robust = np.any(
+            abs(adversarial_predictions - self.test_model_predictions) > np.std(self.test_model_predictions))
 
-        self.adversarial_predictions = self.model.predict(adversarial_examples)
-
-        if self.model_type == "regression":
-            attacks_eval = EvaluatorsFactory.get_evaluator("mape", self.test_target_features,
-                                                           self.adversarial_predictions).measure()
-            test_predictions_eval = EvaluatorsFactory.get_evaluator("mape", self.test_target_features,
-                                                                    self.test_model_predictions).measure()
-        elif self.model_type == "classification":
-            attacks_eval = EvaluatorsFactory.get_evaluator("f1 score", self.test_target_features,
-                                                           self.adversarial_predictions).measure()
-            test_predictions_eval = EvaluatorsFactory.get_evaluator("f1 score", self.test_target_features,
-                                                                    self.test_model_predictions).measure()
-
-        self.not_robust = np.any(abs(self.adversarial_predictions - self.test_model_predictions) > yaml_reader['threshold'])
-        if self.not_robust:
-            return False
-        else:
-            return True
+        return not self.not_robust
 
     def __generate_substitute_model(self, predictions):
         """
@@ -96,7 +98,7 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         :param predictions: the predictions of the local model of the test data.
         :return: the generated substitute model.
         """
-        print("Generating the substitute model ...")
+        print(f"Generating the substitute model of the {self.model_type} model ...")
 
         rf_pipelines = make_pipeline(RandomForestClassifier())
 

@@ -1,5 +1,7 @@
+import numpy as np
 import pandas as pd
 
+from auto_evaluator.adverserial_test_cases.adversarial_attack_substitute import AdversarialAttackSubstitute
 from auto_evaluator.carbon.carbon_emission.carbon import Carbon
 from auto_evaluator.carbon.carbon_emission.carbon_calculator import CarbonCalculator
 from auto_evaluator.carbon.inference_time.inference_time import InferenceTime
@@ -20,7 +22,8 @@ class AutoEvaluator:
         :param evaluation_metrics: the evaluation metrics to be calculated.
         :param train_dataset: the train dataset features.
         :param train_target: the train dataset target.
-        :param features_description: the features description, where key is the feature and the value is the description.
+        :param features_description: the features description,
+         where key is the feature and the value is the description.
         :return: An instance of the auto evaluator.
         """
         self.model_pipeline = model_pipeline
@@ -37,8 +40,6 @@ class AutoEvaluator:
 
         self.num_classes = -1 if self.model_type == "regression" \
             else get_num_classes(self.model_type, self.test_target)
-
-        print(self.model_type)
 
         self.features_description = features_description
 
@@ -65,9 +66,10 @@ class AutoEvaluator:
         :return: the reliability diagram values to be displayed in the graph.
         """
         return EvaluatorsFactory.get_evaluator(f"{self.model_type} reliability evaluation", self.test_target,
-                                               self.model_pipeline.predict_proba(data), num_of_classes=self.num_classes).measure()
+                                               self.model_pipeline.predict_proba(data),
+                                               num_of_classes=self.num_classes).measure()
 
-    def __get_environmental_impact(self):
+    def __get_environmental_impact(self) -> dict:
         """
         Getting the environmental impact values.
         :return: a dictionary of the time inference and the carbon emission values.
@@ -94,7 +96,42 @@ class AutoEvaluator:
             'carbon_summary': carbon_emission_summary
         }
 
-    def get_evaluations(self):
+    def __get_adversarial_test_cases(self) -> pd.DataFrame:
+        """
+        Getting the adversarial test cases of the model.
+        :return: a data frame containing the adversarial test cases,
+         the expected output, and the model output.
+        """
+        adversarial_attack = (
+            AdversarialAttackSubstitute(self.model_pipeline, self.model_type,
+                                        self.test_dataset, self.test_target,
+                                        num_classes=self.num_classes) if self.train_target is None else
+            AdversarialAttackSubstitute(self.model_pipeline, self.model_type,
+                                        self.test_dataset, self.test_target,
+                                        train_input_features=self.train_dataset,
+                                        train_target_features=self.train_target,
+                                        num_classes=self.num_classes))
+
+        adversarial_examples_generated = adversarial_attack.generate()
+        dataset_columns = list(self.test_dataset.columns)
+
+        adversarial_examples_generated_df = pd.DataFrame(adversarial_examples_generated,
+                                                         columns=dataset_columns)
+
+        adversarial_examples_predictions = self.model_pipeline.predict(adversarial_examples_generated_df)
+
+        adv_test_cases, true_value, predicted_value = adversarial_attack.get_adversarial_test_cases(
+            adversarial_examples_generated,
+            adversarial_examples_predictions)
+
+        true_value = true_value.reshape((-1, 1))
+        predicted_value = predicted_value.reshape((-1, 1))
+        adv_test_cases_instances = np.concatenate((adv_test_cases, true_value, predicted_value), axis=1)
+        dataset_columns.extend(["Expected Output", "Model Output"])
+
+        return pd.DataFrame(adv_test_cases_instances, columns=dataset_columns)
+
+    def get_evaluations(self) -> dict:
         """
         Getting all the evaluation values in auto evaluator.
         :return: a dictionary of all the evaluation values in auto evaluator.
@@ -103,9 +140,11 @@ class AutoEvaluator:
             'evaluation_metrics_test': self.__get_evaluation_metrics(self.test_target, self.test_predictions),
 
             'evaluation_metrics_train': {} if self.train_dataset is None
-            else self.__get_evaluation_metrics(self.test_target, self.test_predictions),
+            else self.__get_evaluation_metrics(self.train_target, self.train_predictions),
 
             'reliability_diagram': self.__get_reliability_diagram(self.test_dataset),
 
-            'environmental_impact': self.__get_environmental_impact()
+            'environmental_impact': self.__get_environmental_impact(),
+
+            'adversarial_test_cases': self.__get_adversarial_test_cases()
         }

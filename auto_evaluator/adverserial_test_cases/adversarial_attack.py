@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
-
 import numpy as np
-import pandas as pd
 
 from auto_evaluator.utils.validation import convert_dataframe_to_numpy
 
@@ -27,7 +25,6 @@ class AdversarialAttack(ABC):
         self.model_type = model_type
         self.model = model
         self.not_robust = None
-        self.score = None
 
         self.test_input_features = convert_dataframe_to_numpy(test_input_features)
         self.test_target_features = convert_dataframe_to_numpy(test_target_features)
@@ -67,10 +64,3 @@ class AdversarialAttack(ABC):
         :return: a flag indicating whether the model is robust to adversarial attacks.
         """
         pass
-
-    def __str__(self):
-        robust_str = "robust" if self.not_robust else "not robust"
-
-        return (f'According to the results of evaluating the model predictions of the original examples'
-                f' to the adversarial examples, the model is {robust_str} to adversarial attacks with score '
-                f'{self.score * 100}%')

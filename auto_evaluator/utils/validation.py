@@ -11,6 +11,8 @@ def convert_dataframe_to_numpy(data):
     try:
         if isinstance(data, pd.DataFrame):
             return data.to_numpy()
+        if isinstance(data, pd.Series):
+            return data.to_numpy()
         if isinstance(data, np.ndarray):
             return data
     except (TypeError, ValueError) as e:
