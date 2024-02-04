@@ -197,10 +197,14 @@ class AutoEvaluator:
             adversarial_examples_generated,
             adversarial_examples_predictions)
 
+        dataset_columns.extend(["Expected Output", "Model Output"])
+        # if the model is robust, return an empty dataframe
+        if true_value.size == 0:
+            return pd.DataFrame(columns=dataset_columns)
+
         true_value = true_value.reshape((-1, 1))
         predicted_value = predicted_value.reshape((-1, 1))
         adv_test_cases_instances = np.concatenate((adv_test_cases, true_value, predicted_value), axis=1)
-        dataset_columns.extend(["Expected Output", "Model Output"])
 
         return pd.DataFrame(adv_test_cases_instances, columns=dataset_columns)
 
