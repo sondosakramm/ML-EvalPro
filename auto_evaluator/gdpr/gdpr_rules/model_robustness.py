@@ -15,15 +15,9 @@ class ModelRobustness(GdprCompliance):
 
 
     def __str__(self):
-        summary = f'{5 * "*"}\tModel Security\t{5 * "*"}\n'
+        summary = f'{5 * "*"}\tModel Robustness\t{5 * "*"}\n'
         if self.__get_evaluation():
-            summary += (f'Model is Robust.\nPredictions of the original dataset are:\n'
-                        f'{self.attacks}'
-                        f'\nPredictions of the Adversarial attacks are:\n'
-                        f'{self.X_test}')
+            summary += f'Model is Robust.'
         else:
-            summary += (f'Model is NOT Robust.\nPredictions of the original dataset are:\n'
-                        f'{self.attacks}'
-                        f'\nPredictions of the Adversarial attacks are:\n'
-                        f'{self.X_test}')
+            summary += f'Model is NOT Robust.'
         return summary
