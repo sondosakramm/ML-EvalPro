@@ -40,7 +40,7 @@ class ModelVarianceByTestData(ModelVariance):
         """
         self.model_avg_error = []
         self.X_test_with_features_name = X_test
-        super().__init__(model, convert_dataframe_to_nuutompy(X_test), convert_dataframe_to_numpy(y_test), None, None,
+        super().__init__(model, convert_dataframe_to_numpy(X_test), convert_dataframe_to_numpy(y_test), None, None,
                          problem_type, metric)
 
     def __get_numerical(self, feature_index, string_flag):

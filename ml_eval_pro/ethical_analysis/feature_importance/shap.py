@@ -26,7 +26,8 @@ class SHAP(FeatureImportance):
         :param shap_values: the shapley values for each feature.
         :return: The feature importance values sorted in descending order.
         """
-        mean_abs_shap = np.mean(np.abs(shap_values), axis=1)
-        summary_df = pd.DataFrame(mean_abs_shap.sum(axis=0), index=self.data.columns, columns=['Mean_ABS_SHAP'])
+        abs_shap = np.abs(shap_values)
+        mean_abs_shap = np.mean(abs_shap, axis=0)
+        summary_df = pd.DataFrame(mean_abs_shap, index=self.data.columns, columns=['Mean_ABS_SHAP'])
         summary_df.sort_values(by='Mean_ABS_SHAP', ascending=False, inplace=True)
         return list(summary_df.to_dict().values())[0]
