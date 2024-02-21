@@ -5,7 +5,7 @@ import shap
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, BaggingClassifier, BaggingRegressor, \
     AdaBoostClassifier, AdaBoostRegressor, GradientBoostingClassifier, GradientBoostingRegressor, StackingClassifier, \
     StackingRegressor
-from sklearn.linear_model import LogisticRegression, Ridge, ElasticNet, Lasso
+from sklearn.linear_model import LogisticRegression, Ridge, ElasticNet, Lasso, LinearRegression
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor, RadiusNeighborsClassifier, \
     RadiusNeighborsRegressor
 from sklearn.svm import SVC, NuSVC, SVR, NuSVR
@@ -21,13 +21,10 @@ class ModelTransparency(GdprCompliance):
 
     A class for evaluating model transparency and explain-ability based on GDPR compliance rules.
 
-    Parameters:
-    - model: The trained machine learning model to be evaluated for transparency.
-    - X_test: The feature matrix of the test dataset.
-    - y_test: The target values of the test dataset.
-    - problem_type: The type of machine learning problem, either 'classification' or 'regression' (default is 'classification').
-    - X_train: The feature matrix of the training dataset (optional).
-    - y_train: The target values of the training dataset (optional).
+    Parameters: - model: The trained machine learning model to be evaluated for transparency. - X_test: The feature
+    matrix of the test dataset. - y_test: The target values of the test dataset. - problem_type: The type of machine
+    learning problem, either 'classification' or 'regression' (default is 'classification'). - X_train: The feature
+    matrix of the training dataset (optional). - y_train: The target values of the training dataset (optional).
 
     Attributes:
     - model: The trained machine learning model.
@@ -43,7 +40,8 @@ class ModelTransparency(GdprCompliance):
                  features_description: dict = None, num_of_classes: int = 2, n_bins: int = 5):
         super().__init__(model, X_test, y_test, problem_type, X_train, y_train, features_description, num_of_classes,
                          n_bins)
-        self.summary_str = f''
+        self.avg_entropy = self.__calculate_avg_entropy()
+
 
     @staticmethod
     def __calculate_entropy(values):
@@ -54,26 +52,24 @@ class ModelTransparency(GdprCompliance):
         """Calculate the average entropy of SHAP values for the model predictions."""
         explainer = shap.Explainer(self.model.predict, shap.utils.sample(self.X_test, int(self.X_test.shape[0] * 0.1)))
         shap_values = explainer(self.X_test).values
-        normalized_shap_values = shap_values / np.sum(np.abs(shap_values))
+        normalized_shap_values = np.abs(shap_values) / np.sum(np.abs(shap_values))
         epsilon = 1e-10  # To avoid Zero Logarithm problem "-inf"
         normalized_shap_values = np.maximum(normalized_shap_values, epsilon)
         entropies = [self.__calculate_entropy(inner_array) for inner_array in normalized_shap_values[0]]
         return np.mean(entropies)
 
-    def __check_significance(self):
+    def check_significance(self):
         """Check if the average entropy is below a predefined significance threshold."""
-        self.avg_entropy = self.__calculate_avg_entropy()
         significant = YamlReader(os.path.join(os.path.curdir,
-                                              "ml_eval_pro",
                                               "config_files",
                                               "system_config.yaml")).get("thresholds")["shap_significance"]
         if self.avg_entropy < significant:
             return True
         return False
 
-    def __check_explain_ability(self):
+    def check_explain_ability(self):
         """Check the explain-ability of the model based on its type."""
-        explainable_models = [LogisticRegression, Ridge, Lasso, ElasticNet, DecisionTreeClassifier,
+        explainable_models = [LinearRegression, LogisticRegression, Ridge, Lasso, ElasticNet, DecisionTreeClassifier,
                               DecisionTreeRegressor, ExtraTreeClassifier, ExtraTreeRegressor]
 
         partially_explainable_models = [KNeighborsClassifier, KNeighborsRegressor,
@@ -84,37 +80,13 @@ class ModelTransparency(GdprCompliance):
                           AdaBoostClassifier, AdaBoostRegressor, GradientBoostingClassifier, GradientBoostingRegressor,
                           XGBRegressor,
                           StackingClassifier, StackingRegressor]
-        self.summary_str += f'{5 * "*"}\tModel Transparency\t{5 * "*"}\n'
-        try:
-            if any(isinstance(self.model, model_type) for model_type in explainable_models):
-                self.summary_str += ('The model is explainable because it falls into a category of models known for '
-                                     'their interpretability.')
-                return True
-            elif any(isinstance(self.model, model_type) for model_type in partially_explainable_models):
-                self.summary_str += ('The model is partially explainable. '
-                                     'While some aspects are interpretable, it may have complex components.')
-                return True
-            elif any(isinstance(self.model, model_type) for model_type in complex_models):
-                self.summary_str += f'The model is complex and less explainable.'
-                return True
-            else:
-                return False
-        except Exception as e:
-            return f'Model type is not supported {e}'
 
-    def __str__(self):
-        """Override of the string representation to provide a summary of model transparency."""
-        if self.__check_explain_ability():
-            if self.__check_significance():
-                self.summary_str += (f'The average entropy value for the distributions of the instance-specific feature importance is '
-                                     f'{self.avg_entropy:.8f}.\n'
-                                     f'Low entropy signifies that the model predictions are driven by clear and '
-                                     f'distinguishable patterns within the input features.\n')
-
-            else:
-                self.summary_str += ('The models interpretability may be more challenging. '
-                                     'Which indicates a greater degree of complexity and potential interactions among '
-                                     'features in influencing predictions.\n')
+        if any(isinstance(self.model, model_type) for model_type in explainable_models):
+            return "A"
+        elif any(isinstance(self.model, model_type) for model_type in partially_explainable_models):
+            return "B"
+        elif any(isinstance(self.model, model_type) for model_type in complex_models):
+            return "C"
         else:
-            self.summary_str += f'The model is complex and hard to be explainable and interpret.\n'
-        return self.summary_str
+            return "I"
+
