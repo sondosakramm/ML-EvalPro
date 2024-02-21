@@ -4,9 +4,9 @@ from ml_eval_pro.gdpr.gdpr_compliance import GdprCompliance
 
 class ModelReliability(GdprCompliance):
     def __str__(self):
-        self.prediction = self.model.predict_proba(self.X_test)
         summary_str = f'{5*"*"}\tModel Reliability\t{5*"*"}\n'
         if self.problem_type == 'classification':
+            self.prediction = self.model.predict_proba(self.X_test)
             evaluator = EvaluatorsFactory.get_evaluator("expected calibration error",
                                                         self.y_test, self.prediction,
                                                         self.num_of_classes, self.n_bins)

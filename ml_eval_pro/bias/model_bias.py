@@ -56,4 +56,5 @@ class ModelBias:
         features_values = ', '.join(map(str, features_bias_np[:, 1]))
 
         return (f"By calculating the predictions of different possible values of each feature,"
-                f" the biased features are {features_names} by the values {features_values} respectively.")
+                f" the biased features are {features_names} The corresponding bias statistics are {features_values}"
+                f" respectively, given that values closer to 0 indicate less bias.")

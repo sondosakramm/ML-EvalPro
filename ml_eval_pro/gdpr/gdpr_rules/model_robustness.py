@@ -19,5 +19,5 @@ class ModelRobustness(GdprCompliance):
         if self.__get_evaluation():
             summary += f'Model is Robust.'
         else:
-            summary += f'Model is NOT Robust.'
+            summary += f'Model is NOT Robust. There exists some adversarial attacks found on the dataset!'
         return summary
