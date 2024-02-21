@@ -77,13 +77,14 @@ class ModelVarianceByTestData(ModelVariance):
         Get the difference between X_test predictions error and each feature prediction error after perturbations.
 
         return:
-         list: difference between X_test predictions error and each feature prediction error that exceeds the threshold.
-
+         list: difference between X_test predictions error and each feature prediction error that exceeds the threshold,
+               with the names of the features instead of indexes.
         """
         exceeds_threshold = []
+        feature_names = self.X_test_with_features_name.columns.tolist()  # Convert column names to a list
         for i in range(len(self.model_avg_error[1:])):
             if abs(self.model_avg_error[i] - self.model_avg_error[0]) > self.yaml_reader.get('variance')['threshold']:
-                exceeds_threshold.append(i)
+                exceeds_threshold.append(feature_names[i])
         return exceeds_threshold
 
     def __str__(self):
@@ -91,8 +92,8 @@ class ModelVarianceByTestData(ModelVariance):
         return:
          str: a summary about detecting high variance prediction or not.
         """
-        summary = f''
-        features_exceed_threshold = self.get_diff()
+        summary = ''
+        features_exceed_threshold = self.get_diff()  # This now contains feature names
         if len(features_exceed_threshold) > 0:
             summary += f'High predictions variance is detected when doing small perturbations on features '
             i = 0
@@ -103,5 +104,5 @@ class ModelVarianceByTestData(ModelVariance):
             summary += (f'\nwhich suggests model overfitting on the training set on these specific features '
                         f'or the high importance of these features.')
         else:
-            summary = f'High predictions variance is NOT detected when doing small perturbations on features '
+            summary = 'High predictions variance is NOT detected when doing small perturbations on features '
         return summary

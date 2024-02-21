@@ -64,7 +64,5 @@ class InferenceTime:
         Return:
         - str: a string of the inference time.
         """
-        msg = (f'Model inference time was {str(self.calc_inference_time_hours())} hours, '
-               f'{self.calc_inference_time_minutes()} minutes, '
-               f'{self.calc_inference_time_seconds()} seconds')
+        msg = (f'The model average inference time per instance is {str(self.calc_inference_time_seconds())} seconds')
         return msg

@@ -84,7 +84,7 @@ class ModelTransparency(GdprCompliance):
                           AdaBoostClassifier, AdaBoostRegressor, GradientBoostingClassifier, GradientBoostingRegressor,
                           XGBRegressor,
                           StackingClassifier, StackingRegressor]
-        self.summary_str += f'{5 * "*"}\tModel Explain-ability/Interpretability\t{5 * "*"}\n'
+        self.summary_str += f'{5 * "*"}\tModel Transparency\t{5 * "*"}\n'
         try:
             if any(isinstance(self.model, model_type) for model_type in explainable_models):
                 self.summary_str += ('The model is explainable because it falls into a category of models known for '
@@ -106,7 +106,7 @@ class ModelTransparency(GdprCompliance):
         """Override of the string representation to provide a summary of model transparency."""
         if self.__check_explain_ability():
             if self.__check_significance():
-                self.summary_str += (f'The obtained entropy values are consistently low, averaging around '
+                self.summary_str += (f'The average entropy value for the distributions of the instance-specific feature importance is '
                                      f'{self.avg_entropy:.8f}.\n'
                                      f'Low entropy signifies that the model predictions are driven by clear and '
                                      f'distinguishable patterns within the input features.\n')

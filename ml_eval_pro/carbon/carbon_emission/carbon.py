@@ -1,8 +1,8 @@
 import os.path
 
-from ml_eval_pro.carbon.carbon_emission.carbon_calculator import CarbonCalculator
-from ml_eval_pro.carbon.inference_time.inference_time import InferenceTime
-from ml_eval_pro.configuration_manager.configuration_reader.yaml_reader import YamlReader
+from auto_evaluator.carbon.carbon_emission.carbon_calculator import CarbonCalculator
+from auto_evaluator.carbon.inference_time.inference_time import InferenceTime
+from auto_evaluator.configuration_manager.configuration_reader.yaml_reader import YamlReader
 
 
 class Carbon:
@@ -20,7 +20,7 @@ class Carbon:
         - data: (train/test) data that model will use to generate predictions.
 
         """
-        self.__yaml_reader = YamlReader(os.path.join(os.path.curdir, "ml_eval_pro",
+        self.__yaml_reader = YamlReader(os.path.join(os.path.curdir, "auto_evaluator",
                                                      "config_files", "system_config.yaml"))
         self._inference_time = InferenceTime(model, data).calc_inference_time_hours()
         self._cpu_name = self.__yaml_reader.get('cpu')['name']
