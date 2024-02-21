@@ -11,6 +11,7 @@ from ml_eval_pro.gdpr.gdpr_rules.model_ethical import ModelEthical
 from ml_eval_pro.gdpr.gdpr_rules.model_reliability import ModelReliability
 from ml_eval_pro.gdpr.gdpr_rules.model_robustness import ModelRobustness
 from ml_eval_pro.gdpr.gdpr_rules.model_transparency import ModelTransparency
+from ml_eval_pro.summary.model_transparency_summary import ModelTransparencySummary
 from ml_eval_pro.utils.validate_model_type import check_model_type, get_num_classes
 from ml_eval_pro.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 from ml_eval_pro.variance.model_variance_by_test_data import ModelVarianceByTestData
@@ -234,9 +235,12 @@ class AutoEvaluator:
         model_transparency = ModelTransparency(model=self.model_pipeline,
                                                X_test=self.test_dataset,
                                                y_test=self.test_target,
-                                               problem_type=self.model_type).__str__()
+                                               problem_type=self.model_type)
 
-        return model_ethical + '\n' + model_reliability + '\n' + model_robustness + '\n' + model_transparency
+        model_transparency_summary = ModelTransparencySummary(model_transparency)
+
+        return (model_ethical + '\n' + model_reliability + '\n' + model_robustness + '\n'
+                + model_transparency_summary.get_summary())
 
     def __get_machine_unlearning_ability(self):
         """
