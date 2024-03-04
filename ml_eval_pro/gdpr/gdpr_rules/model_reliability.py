@@ -3,21 +3,17 @@ from ml_eval_pro.gdpr.gdpr_compliance import GdprCompliance
 
 
 class ModelReliability(GdprCompliance):
-    def __str__(self):
-        summary_str = f'{5*"*"}\tModel Reliability\t{5*"*"}\n'
-        if self.problem_type == 'classification':
-            self.prediction = self.model.predict_proba(self.X_test)
-            evaluator = EvaluatorsFactory.get_evaluator("expected calibration error",
-                                                        self.y_test, self.prediction,
-                                                        self.num_of_classes, self.n_bins)
-            ece = evaluator.measure()
-            summary_str += (f'The model reliability evaluation showed a mismatch between the model confidence level '
-                            f'and the accuracy of its predictions by {ece * 100: .5f}% on average.\n')
 
-            return summary_str
-        elif self.problem_type == 'regression':
-            summary_str += f'Reliability Regression Graph'
-            # --------------------- Graph ---------------------
-            return summary_str
-        summary_str += f'Problem type is not supported.'
-        return summary_str
+    def __init__(self, model=None, X_test=None, y_test=None, problem_type='classification', X_train=None, y_train=None,
+                 features_description: dict = None, num_of_classes: int = 2, n_bins: int = 5):
+        super().__init__(model, X_test, y_test, problem_type, X_train, y_train, features_description, num_of_classes,
+                         n_bins)
+        self.prediction = None
+
+    def get_metric(self):
+        self.prediction = self.model.predict_proba(self.X_test)
+        evaluator = EvaluatorsFactory.get_evaluator("expected calibration error",
+                                                    self.y_test, self.prediction,
+                                                    self.num_of_classes, self.n_bins)
+        ece = evaluator.measure()
+        return ece

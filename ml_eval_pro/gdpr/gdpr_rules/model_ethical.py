@@ -6,7 +6,7 @@ from ml_eval_pro.llm.llm_singleton import LLMSingleton
 
 class ModelEthical(GdprCompliance):
 
-    def __get_unethical_features(self):
+    def get_unethical_features(self):
 
         """
         Get unethical features and the reason of why it's unethical by using LLMs.
@@ -30,7 +30,6 @@ class ModelEthical(GdprCompliance):
             features contributing in predictions. Is this feature '{curr_feature}' ethical and fair to use? and why?\
             If the input feature is ethical, say the word 'True'. If the input feature is not ethical, say the word 'False'."
 
-
             single_feature_ethics = LLMSingleton.execute_prompt(template_feature_importance, question=question)
 
             if not eval(single_feature_ethics.split()[0][:-1]):
@@ -43,11 +42,3 @@ class ModelEthical(GdprCompliance):
                 feature_unethical['reason'].append(result_text)
 
         return feature_unethical
-
-    def __str__(self):
-        summary_str = f'{5 * "*"}\tModel Ethical\t{5 * "*"}\n'
-        feature_unethical = self.__get_unethical_features()
-        for i in range(len(feature_unethical['feature'])):
-            summary_str += (f'Feature {feature_unethical["feature"][i]} is not ethical because '
-                            f'{feature_unethical["reason"][i]}\n')
-        return summary_str

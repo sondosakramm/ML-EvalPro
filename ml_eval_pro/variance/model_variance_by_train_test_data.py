@@ -38,15 +38,5 @@ class ModelVarianceByTrainTestData(ModelVariance):
         train_error = self.calculate_errors(self.y_train, train_pred)
         test_error = self.calculate_errors(self.y_test, test_pred)
 
-        self.variance = abs(test_error - train_error)
-        return self.variance
-
-    def __str__(self):
-        """Return: str
-           a summary about detecting high variance or not."""
-        summary = f''
-        if self.variance > self.yaml_reader.get('variance')['threshold']:
-            summary += f'High variance is detected.'
-        else:
-            summary += f'No high variance is detected.'
-        return summary
+        variance = abs(test_error - train_error)
+        return variance

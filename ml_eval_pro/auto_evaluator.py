@@ -11,7 +11,14 @@ from ml_eval_pro.gdpr.gdpr_rules.model_ethical import ModelEthical
 from ml_eval_pro.gdpr.gdpr_rules.model_reliability import ModelReliability
 from ml_eval_pro.gdpr.gdpr_rules.model_robustness import ModelRobustness
 from ml_eval_pro.gdpr.gdpr_rules.model_transparency import ModelTransparency
-from ml_eval_pro.summary.model_transparency_summary import ModelTransparencySummary
+from ml_eval_pro.summary.modules_summary.bias_summary import BiasSummary
+from ml_eval_pro.summary.modules_summary.carbon_summary import CarbonSummary
+from ml_eval_pro.summary.modules_summary.inference_summary import InferenceSummary
+from ml_eval_pro.summary.modules_summary.model_ethical_summary import ModelEthicalSummary
+from ml_eval_pro.summary.modules_summary.model_reliability_summary import ModelReliabilitySummary
+from ml_eval_pro.summary.modules_summary.model_robustness_summary import ModelRobustnessSummary
+from ml_eval_pro.summary.modules_summary.model_transparency_summary import ModelTransparencySummary
+from ml_eval_pro.summary.modules_summary.variance_summary import VarianceSummary
 from ml_eval_pro.utils.validate_model_type import check_model_type, get_num_classes
 from ml_eval_pro.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 from ml_eval_pro.variance.model_variance_by_test_data import ModelVarianceByTestData
@@ -101,7 +108,6 @@ class AutoEvaluator:
         inference_time_val = (inference_time.calc_inference_time_hours()
                               + inference_time.calc_inference_time_minutes()
                               + inference_time.calc_inference_time_seconds())
-        inference_time_summary = inference_time.__str__()
 
         carbon_emission = Carbon(self.model_pipeline, self.test_dataset)
         carbon_emission_calc = CarbonCalculator(carbon_emission)
@@ -109,14 +115,13 @@ class AutoEvaluator:
         carbon_emission_carbon_per_prediction = carbon_emission_calc.calculate_carbon()
         carbon_emission_predictions_per_kg_co = carbon_emission_calc.calculate_predictions()
 
-        carbon_emission_summary = carbon_emission.__str__()
 
         return {
             'inference_time_val': inference_time_val,
-            'inference_time_summary': inference_time_summary,
+            'inference_time_summary': InferenceSummary(inference_time).get_summary(),
             'carbon_per_prediction': carbon_emission_carbon_per_prediction,
             'carbon_prediction_per_kg': carbon_emission_predictions_per_kg_co,
-            'carbon_summary': carbon_emission_summary
+            'carbon_summary': CarbonSummary(carbon_emission).get_summary()
         }
 
     def __get_model_bias(self) -> dict:
@@ -127,11 +132,10 @@ class AutoEvaluator:
         print("Evaluating the model bias ...")
         model_bias = ModelBias(self.model_pipeline, self.model_type, self.test_dataset, self.test_target)
         biased_features = model_bias()
-        biased_features_summary = model_bias.__str__()
 
         return {
             "biased_features": np.array(biased_features)[:, 0],
-            "bias_summary": biased_features_summary
+            "bias_summary": BiasSummary(model_bias).get_summary()
         }
 
     def __get_model_variance(self):
@@ -145,13 +149,13 @@ class AutoEvaluator:
             variance_train = ModelVarianceByTrainTestData(self.model_pipeline, self.test_dataset, self.test_target,
                                                           self.train_dataset, self.train_target, self.model_type)
             variance_res['variance_train_value'] = variance_train.calculate_variance()
-            variance_res['variance_train_summary'] = variance_train.__str__()
+            variance_res['variance_train_summary'] = VarianceSummary(variance_train).get_summary()
 
         variance_test = ModelVarianceByTestData(self.model_pipeline, self.test_dataset, self.test_target,
                                                 self.model_type)
         variance_test.calculate_variance()
         variance_res['high_variant_features'] = variance_test.get_diff()
-        variance_res['variance_features_summary'] = variance_test.__str__()
+        variance_res['variance_features_summary'] = VarianceSummary(variance_test).get_summary()
         return variance_res
 
     def __get_feature_importance(self) -> dict:
@@ -219,28 +223,28 @@ class AutoEvaluator:
 
         model_ethical = 'Cannot evaluate model ethnicity due to the unavailability of the features.' if (
                 self.features_description is None) \
-            else ModelEthical(features_description=self.features_description).__str__()
+            else ModelEthical(features_description=self.features_description)
 
         model_reliability = ModelReliability(model=self.model_pipeline,
                                              X_test=self.test_dataset,
                                              y_test=self.test_target,
                                              problem_type=self.model_type,
-                                             num_of_classes=self.num_classes).__str__()
+                                             num_of_classes=self.num_classes)
 
         model_robustness = ModelRobustness(model=self.model_pipeline,
                                            X_test=self.test_dataset,
                                            y_test=self.test_target,
-                                           problem_type=self.model_type).__str__()
+                                           problem_type=self.model_type)
 
         model_transparency = ModelTransparency(model=self.model_pipeline,
                                                X_test=self.test_dataset,
                                                y_test=self.test_target,
                                                problem_type=self.model_type)
 
-        model_transparency_summary = ModelTransparencySummary(model_transparency)
-
-        return (model_ethical + '\n' + model_reliability + '\n' + model_robustness + '\n'
-                + model_transparency_summary.get_summary())
+        return (ModelEthicalSummary(model_ethical).get_summary() +
+                '\n' + ModelReliabilitySummary(model_reliability).get_summary() +
+                '\n' + ModelRobustnessSummary(model_robustness).get_summary() +
+                '\n' + ModelTransparencySummary(model_transparency).get_summary())
 
     def __get_machine_unlearning_ability(self):
         """

@@ -1,6 +1,5 @@
 import os.path
 
-from ml_eval_pro.carbon.carbon_emission.carbon_calculator import CarbonCalculator
 from ml_eval_pro.carbon.inference_time.inference_time import InferenceTime
 from ml_eval_pro.configuration_manager.configuration_reader.yaml_reader import YamlReader
 
@@ -70,12 +69,3 @@ class Carbon:
             return self._energy_generator_value
         else:
             raise Exception(f'ERROR: No attribute called energy_generator_value')
-
-    def __str__(self):
-        return (f'Current platform is deployed on virtual machine with cpu {self.cpu_name}, '
-                f'it\'s speed is {self.cpu_speed} and '
-                f'power consumptions is {self.cpu_value} Kw,'
-                f', assuming that the energy generator is {self.energy_generator}, '
-                f'and it\'s power consumption is {self.energy_generator_value} KgCO2 so it will generate'
-                f' {CarbonCalculator(self).calculate_carbon()} CO2 for a single prediction, '
-                f'{CarbonCalculator(self).calculate_predictions()} predictions will generate 1 Kg Co2')

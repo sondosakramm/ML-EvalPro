@@ -1,7 +1,8 @@
 from ml_eval_pro.gdpr.gdpr_rules.model_transparency import ModelTransparency
+from ml_eval_pro.summary.summary_generator import SummaryGenerator
 
 
-class ModelTransparencySummary:
+class ModelTransparencySummary(SummaryGenerator):
     def __init__(self, model_trans: ModelTransparency):
         self.model_trans = model_trans
 

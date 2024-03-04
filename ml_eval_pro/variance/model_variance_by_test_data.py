@@ -86,23 +86,3 @@ class ModelVarianceByTestData(ModelVariance):
             if abs(self.model_avg_error[i] - self.model_avg_error[0]) > self.yaml_reader.get('variance')['threshold']:
                 exceeds_threshold.append(feature_names[i])
         return exceeds_threshold
-
-    def __str__(self):
-        """
-        return:
-         str: a summary about detecting high variance prediction or not.
-        """
-        summary = ''
-        features_exceed_threshold = self.get_diff()  # This now contains feature names
-        if len(features_exceed_threshold) > 0:
-            summary += f'High predictions variance is detected when doing small perturbations on features '
-            i = 0
-            for column in self.X_test_with_features_name.columns:
-                if i in features_exceed_threshold:
-                    summary += f'{column}, '
-                i += 1
-            summary += (f'\nwhich suggests model overfitting on the training set on these specific features '
-                        f'or the high importance of these features.')
-        else:
-            summary = 'High predictions variance is NOT detected when doing small perturbations on features '
-        return summary
