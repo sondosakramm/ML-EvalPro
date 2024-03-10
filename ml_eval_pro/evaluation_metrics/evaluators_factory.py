@@ -21,8 +21,7 @@ from ml_eval_pro.evaluation_metrics.regression.evaluation_metrics.rmse import RM
 class EvaluatorsFactory:
 
     @staticmethod
-    def get_evaluator(evaluation_metric: str, target, prediction, num_of_classes: int = 2, n_bins: int = 5,
-                      display: bool = False):
+    def get_evaluator(evaluation_metric: str, target, prediction, num_of_classes: int = 2, n_bins: int = 10):
         """
         Create an instance of the appropriate evaluation metric based on the task type.
         :param evaluation_metric: The type of the evaluation metric.
@@ -30,7 +29,6 @@ class EvaluatorsFactory:
         :param prediction: The target predicted values.
         :param num_of_classes: Number of classes (only for classification tasks).
         :param n_bins: the number of bins needed.
-        :param display: display the reliability diagram plot.
         :return: An instance of the evaluation metric.
         """
         try:
@@ -51,7 +49,7 @@ class EvaluatorsFactory:
             elif evaluation_metric == 'expected calibration error':
                 return ECEMetric(target, prediction, num_of_classes, n_bins)
             elif evaluation_metric == 'classification reliability evaluation':
-                return ReliabilityDiagram(target, prediction, num_of_classes, n_bins, display)
+                return ReliabilityDiagram(target, prediction, num_of_classes, n_bins)
             elif evaluation_metric == 'regression reliability evaluation':
                 return Calibration(target, prediction, n_bins)
             elif evaluation_metric == 'accuracy':

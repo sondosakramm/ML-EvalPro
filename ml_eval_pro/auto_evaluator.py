@@ -19,7 +19,7 @@ from ml_eval_pro.summary.modules_summary.model_reliability_summary import ModelR
 from ml_eval_pro.summary.modules_summary.model_robustness_summary import ModelRobustnessSummary
 from ml_eval_pro.summary.modules_summary.model_transparency_summary import ModelTransparencySummary
 from ml_eval_pro.summary.modules_summary.variance_summary import VarianceSummary
-from ml_eval_pro.utils.validate_model_type import check_model_type, get_num_classes
+from ml_eval_pro.utils.validate_model_type import get_num_classes
 from ml_eval_pro.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 from ml_eval_pro.variance.model_variance_by_test_data import ModelVarianceByTestData
 from ml_eval_pro.variance.model_variance_by_train_test_data import ModelVarianceByTrainTestData
@@ -27,12 +27,13 @@ from ml_eval_pro.variance.model_variance_by_train_test_data import ModelVariance
 
 class AutoEvaluator:
 
-    def __init__(self, model_pipeline, test_dataset: pd.DataFrame, test_target: pd.Series,
+    def __init__(self, model_pipeline, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
                  evaluation_metrics: list, train_dataset: pd.DataFrame = None,
                  train_target: pd.Series = None, features_description: dict = None):
         """
         Create an instance of the auto evaluator to get all the evaluation metrics.
         :param model_pipeline: the model pipeline.
+        :param model_type: the model problem type.
         :param test_dataset: the test dataset features.
         :param test_target: the test dataset target.
         :param evaluation_metrics: the evaluation metrics to be calculated.
@@ -43,7 +44,7 @@ class AutoEvaluator:
         :return: An instance of the auto evaluator.
         """
         self.model_pipeline = model_pipeline
-        self.model_type = check_model_type(test_target)
+        self.model_type = model_type
         self.test_dataset = test_dataset
         self.test_target = test_target
         self.evaluation_metrics = evaluation_metrics
