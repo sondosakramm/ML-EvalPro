@@ -1,3 +1,5 @@
+from langchain.output_parsers import ResponseSchema
+
 from ml_eval_pro.ethical_analysis.feature_importance.feature_importance_factory import \
     FeatureImportanceFactory
 from ml_eval_pro.llm.llm_singleton import LLMSingleton
@@ -34,52 +36,53 @@ class EthicalAnalysis:
 
         if self.features_description:
             return (feature_importance_all_vals,
-                    EthicalAnalysis.prompt_feature_ethnicity(self.features_description, feature_importance_all_vals))
+                    EthicalAnalysis.prompt_feature_ethnicity(self.features_description))
 
         return (feature_importance_all_vals,
                 "Unable to address ethical concerns at this time, as no description or details have been provided.")
 
     @classmethod
-    def prompt_feature_ethnicity(cls, features_description, feature_importance_vals):
+    def prompt_feature_ethnicity(cls, features_description):
         """
         Prompting ethnicity of the input features.
         :param features_description: the description of each feature.
-        :param feature_importance_vals: the importance values of each feature.
-        :return: the ethical perspective of the top 3 or 5 important features.
-        :return: a list of the unethical features.
+        :return: the ethical perspective of the given features.
         """
+        unethical_features = cls.get_unethical_features(features_description)
+
+        if len(unethical_features) == 0:
+            return f"No unethical feature was detected."
+
+        res_str = ""
+        for unethical_feature in unethical_features.keys():
+            res_str += f'\n{unethical_feature}: {unethical_features[unethical_feature]}'
+        return (f"Out of the features descriptions provided, the features below were unethical for the following "
+                f"reasons:" + res_str)
+
+    @classmethod
+    def get_unethical_features(cls, features_descriptions: dict) -> dict:
+        """
+         Prompting the unethical features given their description with LLMs.
+         :param features_descriptions: the description of each feature.
+         :return: the unethical features and the reason of being unethical.
+         """
         LLMSingleton()
-        template_feature_importance = """<<SYS>> \nYou are an assistant tasked with answering machine learning related questions.\n <</SYS>>\n\n\
-        [INST] Answer each question independently. You MUST answer the question using ONLY one sentence to illustrate your answer:
-        {question} [/INST]"""
+        unethical_features = {}
+        for feature in features_descriptions.keys():
+            print(f"Evaluating the feature {feature} ...")
+            desc = features_descriptions[feature]
 
-        feature_unethical = []
+            question = f"The feature '{feature}' with description '{desc}' is used in training a machine learning model and it is one of the most important \
+                    features contributing in predictions. Is it ethical and fair to use?"
 
-        feature_size = len(feature_importance_vals.keys())
+            response_schema = [
+                ResponseSchema(name="answer", description="answer to the user's question", type='boolean'),
+                ResponseSchema(name="reason", description="short reason of the answer of the user's question")
+            ]
 
-        if feature_size > 5:
-            feature_size = 5
+            curr_res = LLMSingleton.execute_prompt(question, response_schema)
 
-        for i, curr_feature in enumerate(feature_importance_vals):
-            print(f"Evaluating the feature {curr_feature} ...")
+            if not curr_res['answer']:
+                unethical_features[feature] = curr_res['reason']
 
-            if i >= feature_size:
-                break
-
-            curr_desc = features_description[curr_feature]
-
-            question = f"You have an input feature '{curr_feature}' with description: {curr_desc}. \
-            This feature is used in training a machine learning model and it is one of the most important \
-            features contributing in predictions. Is this feature '{curr_feature}' ethical and fair to use? and why?\
-            If the input feature is ethical, say the word 'True'. If the input feature is not ethical, say the word 'False'."
-
-            single_feature_ethics = LLMSingleton.execute_prompt(template_feature_importance, question=question)
-
-            if not eval(single_feature_ethics.split()[0][:-1]):
-                feature_unethical.append(f'{curr_feature}: {single_feature_ethics.split("False. ")[1]}')
-
-            if len(feature_unethical) == 0:
-                return f"No features of the most {feature_size} important features was unethical."
-
-        return (f"Out of the most {feature_size}, the following features were unethical:\n" +
-                '\n'.join(feature_unethical))
+        return unethical_features
