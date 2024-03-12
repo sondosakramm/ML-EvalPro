@@ -55,10 +55,10 @@ class AutoEvaluator:
         self.train_predictions = None if self.train_target is None \
             else self.model_pipeline.predict(self.train_dataset)
 
-        self.test_predictions_proba = None if self.model_type == "regression" \
+        self.test_predictions_prob = None if self.model_type == "regression" \
             else self.model_pipeline.predict_proba(self.test_dataset)
 
-        self.train_predictions_proba = None if self.model_type == "regression" or self.train_dataset is None \
+        self.train_predictions_prob = None if self.model_type == "regression" or self.train_dataset is None \
             else self.model_pipeline.predict_proba(self.train_dataset)
 
         self.num_classes = -1 if self.model_type == "regression" \
@@ -66,12 +66,12 @@ class AutoEvaluator:
 
         self.features_description = features_description
 
-    def __get_evaluation_metrics(self, target, predictions, predictions_proba):
+    def __get_evaluation_metrics(self, target, predictions, predictions_prob):
         """
         Calculating the evaluation metrics.
         :param target: the target true values.
         :param predictions: the target prediction values.
-        :param predictions: the target prediction probability values of each class (for classification only).
+        :param predictions_prob: the target prediction probability values of each class (for classification only).
         :return: A dictionary of the values.
         """
         print("Evaluating the model using the input evaluation metrics ...")
@@ -79,7 +79,7 @@ class AutoEvaluator:
         for metric in self.evaluation_metrics:
             if metric == 'expected calibration error' or metric == 'auc':
                 res[metric] = EvaluatorsFactory.get_evaluator(metric, target,
-                                                              predictions_proba,
+                                                              predictions_prob,
                                                               num_of_classes=self.num_classes).measure()
             else:
                 res[metric] = EvaluatorsFactory.get_evaluator(metric, target,
@@ -96,7 +96,7 @@ class AutoEvaluator:
         return EvaluatorsFactory.get_evaluator(f"{self.model_type} reliability evaluation",
                                                self.test_target,
                                                self.test_predictions if self.model_type == 'regression' else
-                                               self.test_predictions_proba,
+                                               self.test_predictions_prob,
                                                num_of_classes=self.num_classes).measure()
 
     def __get_environmental_impact(self) -> dict:
@@ -115,7 +115,6 @@ class AutoEvaluator:
 
         carbon_emission_carbon_per_prediction = carbon_emission_calc.calculate_carbon()
         carbon_emission_predictions_per_kg_co = carbon_emission_calc.calculate_predictions()
-
 
         return {
             'inference_time_val': inference_time_val,
@@ -204,6 +203,7 @@ class AutoEvaluator:
             adversarial_examples_predictions)
 
         dataset_columns.extend(["Expected Output", "Model Output"])
+
         # if the model is robust, return an empty dataframe
         if true_value.size == 0:
             return pd.DataFrame(columns=dataset_columns)
@@ -213,7 +213,6 @@ class AutoEvaluator:
         adv_test_cases_instances = np.concatenate((adv_test_cases, true_value, predicted_value), axis=1)
 
         return pd.DataFrame(adv_test_cases_instances, columns=dataset_columns)
-
 
     def __get_model_gdpr_compliance(self):
         """
@@ -261,10 +260,10 @@ class AutoEvaluator:
         """
         return {
             'evaluation_metrics_test': self.__get_evaluation_metrics(self.test_target, self.test_predictions,
-                                                                     self.test_predictions_proba),
+                                                                     self.test_predictions_prob),
 
             'evaluation_metrics_train': {} if self.train_dataset is None
-            else self.__get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_proba),
+            else self.__get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
 
             'reliability_diagram': self.__get_reliability_diagram(),
 
