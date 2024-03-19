@@ -9,6 +9,7 @@ from sklearn.pipeline import make_pipeline
 
 from ml_eval_pro.adverserial_test_cases.adversarial_attack import AdversarialAttack
 from ml_eval_pro.configuration_manager.configuration_reader.yaml_reader import YamlReader
+from ml_eval_pro.utils.optimal_clusters import calculate_optimal_bins
 
 
 class AdversarialAttackSubstitute(AdversarialAttack):
@@ -44,9 +45,10 @@ class AdversarialAttackSubstitute(AdversarialAttack):
                                    use_importance=False, nb_parallel=self.num_classes - 1, batch_size=1, variable_h=0.2)
 
         elif self.model_type == 'regression':
-            num_bins = yaml_reader['min_num_bins'] if self.train_model_predictions.shape[0] > yaml_reader[
-                'min_number_instances'] else int(
-                yaml_reader['num_bins_percentage'] * self.train_model_predictions.shape[0])
+            # num_bins = yaml_reader['min_num_bins'] if self.train_model_predictions.shape[0] > yaml_reader[
+            #     'min_number_instances'] else int(
+            #     yaml_reader['num_bins_percentage'] * self.train_model_predictions.shape[0])
+            num_bins = calculate_optimal_bins(self.train_model_predictions)
             binning_ranges = np.linspace(min(self.train_model_predictions), max(self.train_model_predictions) + 1,
                                          num_bins + 1)
             training_labels_true = np.digitize(self.train_model_predictions, bins=binning_ranges)
