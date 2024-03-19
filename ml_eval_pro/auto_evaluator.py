@@ -221,9 +221,7 @@ class AutoEvaluator:
         """
         print("Evaluating the model GDPR Compliance ...")
 
-        model_ethical = 'Cannot evaluate model ethnicity due to the unavailability of the features.' if (
-                self.features_description is None) \
-            else ModelEthical(features_description=self.features_description)
+        model_ethical = ModelEthical(features_description=self.features_description)
 
         model_reliability = ModelReliability(model=self.model_pipeline,
                                              X_test=self.test_dataset,

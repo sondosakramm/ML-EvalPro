@@ -1,44 +1,12 @@
 import string
 
 from ml_eval_pro.gdpr.gdpr_compliance import GdprCompliance
-from ml_eval_pro.llm.llm_singleton import LLMSingleton
-
+from ml_eval_pro.ethical_analysis.ethical_analysis import EthicalAnalysis
 
 class ModelEthical(GdprCompliance):
-
     def get_unethical_features(self):
+        if self.features_description is None:
+            return "Unable to address ethical concerns at this time, as no description or details have been provided."
+        else:
+            return EthicalAnalysis.prompt_feature_ethnicity(self.features_description)
 
-        """
-        Get unethical features and the reason of why it's unethical by using LLMs.
-        :return: a list of the unethical features.
-        """
-
-        LLMSingleton()
-        template_feature_importance = """<<SYS>> \nYou are an assistant tasked with answering machine learning related questions.\n <</SYS>>\n\n\
-        [INST] Answer each question independently. You MUST answer the question using ONLY one sentence to illustrate your answer:
-        {question} [/INST]"""
-
-        feature_unethical = {'feature': [],
-                             'reason': []}
-
-        for curr_feature in self.features_description.keys():
-
-            curr_desc = self.features_description[curr_feature]
-
-            question = f"You have an input feature '{curr_feature}' with description: {curr_desc}. \
-            This feature is used in training a machine learning model and it is one of the most important \
-            features contributing in predictions. Is this feature '{curr_feature}' ethical and fair to use? and why?\
-            If the input feature is ethical, say the word 'True'. If the input feature is not ethical, say the word 'False'."
-
-            single_feature_ethics = LLMSingleton.execute_prompt(template_feature_importance, question=question)
-
-            if not eval(single_feature_ethics.split()[0][:-1]):
-                feature_unethical['feature'].append(curr_feature)
-                exclude_set = {"true", "false"}
-                translator = str.maketrans("", "", string.punctuation)
-                result_text = ' '.join(
-                    word for word in single_feature_ethics.split() if
-                    word.lower().translate(translator) not in exclude_set)
-                feature_unethical['reason'].append(result_text)
-
-        return feature_unethical
