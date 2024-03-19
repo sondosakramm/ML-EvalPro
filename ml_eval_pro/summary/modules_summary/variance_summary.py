@@ -12,13 +12,13 @@ class VarianceSummary(SummaryGenerator):
         if isinstance(self.variance, ModelVarianceByTestData):
             features_exceed_threshold = self.variance.get_diff()  # This now contains feature names
             if len(features_exceed_threshold) > 0:
-                summary += f'High predictions variance is detected when doing small perturbations on features '
+                summary += f'High predictions variance is detected when doing small perturbations on features \n'
                 i = 0
                 for column in self.variance.X_test_with_features_name.columns:
                     if i in features_exceed_threshold:
                         summary += f'{column}, '
                     i += 1
-                summary += (f'\nwhich suggests model overfitting on the training set on these specific features '
+                summary += (f'which suggests model overfitting on the training set on these specific features '
                             f'or the high importance of these features.')
             else:
                 summary += 'High predictions variance is NOT detected when doing small perturbations on features '

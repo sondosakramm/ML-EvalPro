@@ -1,10 +1,12 @@
+from ml_eval_pro.carbon.carbon_emission.carbon import Carbon
+
 
 class CarbonCalculator:
     """
     A class for calculating carbon emission.
 
     """
-    def __init__(self, carbon):
+    def __init__(self, carbon: Carbon):
         """
         Initialize a CarbonCalculator instance.
 
@@ -34,6 +36,9 @@ class CarbonCalculator:
         - int: number of predictions that will generate 1Kg CO2.
 
         """
-        predictions_needed = 1 / self.calculate_carbon()
-        return round(predictions_needed)
+        try:
+            predictions_needed = 1 / self.calculate_carbon()
+            return round(predictions_needed)
+        except ZeroDivisionError as e:
+            return 0
 
