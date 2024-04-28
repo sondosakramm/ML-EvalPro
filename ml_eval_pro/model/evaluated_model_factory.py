@@ -26,7 +26,7 @@ class EvaluatedModelFactory:
         _factory_supported_classes = {"mlflow.sklearn": EvaluatedModelSKLearn,
                                       # "mlflow.pytorch": EvaluatedModel,
                                       # "mlflow.h2o": EvaluatedModel,
-                                      # "mlflow.tensorflow": EvaluatedModel,
+                                      # "mlflow.tensorflow": EvaluatedModelTensorflow,
                                       # "mlflow.keras": EvaluatedModel,
                                       # "mlflow.sparkmllib": EvaluatedModel
                                       }

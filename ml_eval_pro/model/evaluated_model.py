@@ -3,6 +3,8 @@
 import mlflow
 import numpy as np
 
+from ml_eval_pro.utils.validation import convert_dataframe_to_numpy
+
 
 class EvaluatedModel:
     def __init__(self, model_uri, problem_type):
@@ -15,7 +17,13 @@ class EvaluatedModel:
         return mlflow.pyfunc.load_model(model_uri=self.model_uri)
 
     def predict(self, data, predict_class=True):
-        if self.problem_type == "classification" and predict_class:
-            return np.argmax(mlflow.pyfunc.predict(data).to_numpy(), axis=1)
+        predictions = convert_dataframe_to_numpy(self.model.predict(data))
 
-        return mlflow.pyfunc.predict(data)
+        if self.problem_type == "classification" and predict_class:
+
+            if predictions.shape[1] == 1:
+                return ((predictions >= 0.5) * 1).reshape(-1,)
+
+            return np.argmax(predictions, axis=1)
+
+        return predictions.reshape(-1,)
