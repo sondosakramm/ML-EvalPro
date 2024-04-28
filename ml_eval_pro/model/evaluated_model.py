@@ -1,22 +1,21 @@
-from abc import ABC, abstractmethod
+# from abc import ABC, abstractmethod
 
 import mlflow
+import numpy as np
 
 
-class EvaluatedModel(ABC):
-    def __init__(self, model_uri, problem_type, model_type):
-        self.model = EvaluatedModel.load(model_uri)
+class EvaluatedModel:
+    def __init__(self, model_uri, problem_type):
+        self.model_uri = model_uri
+        self.model = self.load()
         self.problem_type = problem_type
-        self.model_type = model_type
 
-    @classmethod
-    def load(cls, model_uri):
-        return mlflow.pyfunc.load_model(model_uri=model_uri)
+    def load(self):
+        print(f"Loading the model ...")
+        return mlflow.pyfunc.load_model(model_uri=self.model_uri)
 
-    @abstractmethod
-    def predict(self, data):
-        pass
+    def predict(self, data, predict_class=True):
+        if self.problem_type == "classification" and predict_class:
+            return np.argmax(mlflow.pyfunc.predict(data).to_numpy(), axis=1)
 
-    @abstractmethod
-    def predict_class(self, data):
-        pass
+        return mlflow.pyfunc.predict(data)

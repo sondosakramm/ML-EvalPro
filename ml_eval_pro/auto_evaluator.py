@@ -11,6 +11,7 @@ from ml_eval_pro.gdpr.gdpr_rules.model_ethical import ModelEthical
 from ml_eval_pro.gdpr.gdpr_rules.model_reliability import ModelReliability
 from ml_eval_pro.gdpr.gdpr_rules.model_robustness import ModelRobustness
 from ml_eval_pro.gdpr.gdpr_rules.model_transparency import ModelTransparency
+from ml_eval_pro.model.evaluated_model_factory import EvaluatedModelFactory
 from ml_eval_pro.summary.modules_summary.bias_summary import BiasSummary
 from ml_eval_pro.summary.modules_summary.carbon_summary import CarbonSummary
 from ml_eval_pro.summary.modules_summary.inference_summary import InferenceSummary
@@ -27,12 +28,12 @@ from ml_eval_pro.variance.model_variance_by_train_test_data import ModelVariance
 
 class AutoEvaluator:
 
-    def __init__(self, model_pipeline, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
+    def __init__(self, model_uri, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
                  evaluation_metrics: list, train_dataset: pd.DataFrame = None,
                  train_target: pd.Series = None, features_description: dict = None):
         """
         Create an instance of the auto evaluator to get all the evaluation metrics.
-        :param model_pipeline: the model pipeline.
+        :param model_uri: the model uri.
         :param model_type: the model problem type.
         :param test_dataset: the test dataset features.
         :param test_target: the test dataset target.
@@ -43,7 +44,7 @@ class AutoEvaluator:
          where key is the feature and the value is the description.
         :return: An instance of the auto evaluator.
         """
-        self.model_pipeline = model_pipeline
+        self.model_pipeline = EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type)
         self.model_type = model_type
         self.test_dataset = test_dataset
         self.test_target = test_target
@@ -56,10 +57,10 @@ class AutoEvaluator:
             else self.model_pipeline.predict(self.train_dataset)
 
         self.test_predictions_prob = None if self.model_type == "regression" \
-            else self.model_pipeline.predict_proba(self.test_dataset)
+            else self.model_pipeline.predict(self.test_dataset, predict_class=False)
 
         self.train_predictions_prob = None if self.model_type == "regression" or self.train_dataset is None \
-            else self.model_pipeline.predict_proba(self.train_dataset)
+            else self.model_pipeline.predict(self.train_dataset, predict_class=False)
 
         self.num_classes = -1 if self.model_type == "regression" \
             else get_num_classes(self.model_type, self.test_target)
@@ -134,7 +135,7 @@ class AutoEvaluator:
         biased_features = model_bias()
 
         return {
-            "biased_features": np.array(biased_features)[:, 0],
+            "biased_features": [] if len(biased_features) == 0 else np.array(biased_features)[:, 0],
             "bias_summary": BiasSummary(model_bias).get_summary()
         }
 
@@ -277,6 +278,6 @@ class AutoEvaluator:
 
             'gdpr_compliance': self.__get_model_gdpr_compliance(),
 
-            'machine_unlearning': self.__get_machine_unlearning_ability()
+            # 'machine_unlearning': self.__get_machine_unlearning_ability()
 
         }
