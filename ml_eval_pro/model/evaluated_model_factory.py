@@ -1,5 +1,6 @@
 import mlflow
 
+from ml_eval_pro.model.evaluate_model_lightgbm import EvaluatedModelLightGBM
 from ml_eval_pro.model.evaluate_model_xgboost import EvaluatedModelXGBoost
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.model.evaluated_model_h2o import EvaluatedModelH2O
@@ -35,7 +36,7 @@ class EvaluatedModelFactory:
                                       # "mlflow.keras": EvaluatedModel,
                                       # "mlflow.sparkmllib": EvaluatedModel,
                                       # "mlflow.statsmodels": EvaluatedModel,
-                                      # "mlflow.lightgbm": EvaluatedModel,
+                                      "mlflow.lightgbm": EvaluatedModelLightGBM,
                                       # "mlflow.catboost": EvaluatedModel,
                                       "mlflow.xgboost": EvaluatedModelXGBoost
                                       }
