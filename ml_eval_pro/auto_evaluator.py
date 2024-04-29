@@ -155,11 +155,12 @@ class AutoEvaluator:
             variance_res['variance_train_value'] = variance_train.calculate_variance()
             variance_res['variance_train_summary'] = VarianceSummary(variance_train).get_summary()
 
-        variance_test = ModelVarianceByTestData(self.model_pipeline, self.test_dataset, self.test_target,
+        else:
+            variance_test = ModelVarianceByTestData(self.model_pipeline, self.test_dataset, self.test_target,
                                                 self.model_type)
-        variance_test.calculate_variance()
-        variance_res['high_variant_features'] = variance_test.get_diff()
-        variance_res['variance_features_summary'] = VarianceSummary(variance_test).get_summary()
+            variance_test.calculate_variance()
+            variance_res['high_variant_features'] = variance_test.get_diff()
+            variance_res['variance_features_summary'] = VarianceSummary(variance_test).get_summary()
         return variance_res
 
     def __get_feature_importance(self) -> dict:
@@ -266,13 +267,13 @@ class AutoEvaluator:
             'evaluation_metrics_train': {} if self.train_dataset is None
             else self.__get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
 
-            'reliability_diagram': self.__get_reliability_diagram(),
+            # 'reliability_diagram': self.__get_reliability_diagram(),
 
             'environmental_impact': self.__get_environmental_impact(),
 
             'model_bias': self.__get_model_bias(),
-            #
-            # 'model_variance': self.__get_model_variance(),
+
+            'model_variance': self.__get_model_variance(),
             #
             # 'ethical_analysis': self.__get_feature_importance(),
 
