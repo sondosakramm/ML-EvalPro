@@ -19,11 +19,16 @@ class EvaluatedModel:
     def predict(self, data, predict_class=True):
         predictions = convert_dataframe_to_numpy(self.model.predict(data))
 
-        if self.problem_type == "classification" and predict_class:
+        if self.problem_type == "classification":
+            # For binary classification with the probability of the positive class ONLY
+            if len(predictions.shape) == 1 or predictions.shape[1] == 1:
+                predictions = np.concatenate([1-predictions, predictions], axis=1)
 
-            if predictions.shape[1] == 1:
-                return ((predictions >= 0.5) * 1).reshape(-1,)
+            if predict_class:
+                return np.argmax(predictions, axis=1)
 
-            return np.argmax(predictions, axis=1)
+        elif self.problem_type == "regression":
+            if len(predictions.shape) == 2 and predictions.shape[1] == 1:
+                predictions = predictions.reshape(-1,)
 
-        return predictions.reshape(-1,)
+        return predictions

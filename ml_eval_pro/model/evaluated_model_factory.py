@@ -19,20 +19,16 @@ class EvaluatedModelFactory:
         :param model_uri: the model uri.
         :return: the created model class according to its type.
         """
-
         model_info = mlflow.models.get_model_info(model_uri)
         model_type = model_info.flavors[mlflow.pyfunc.FLAVOR_NAME]["loader_module"]
 
         _factory_supported_classes = {"mlflow.sklearn": EvaluatedModelSKLearn,
                                       # "mlflow.pytorch": EvaluatedModel,
-                                      # "mlflow.h2o": EvaluatedModel,
-                                      # "mlflow.tensorflow": EvaluatedModelTensorflow,
-                                      # "mlflow.keras": EvaluatedModel,
+                                      "mlflow.h2o": EvaluatedModelH2O,
                                       # "mlflow.sparkmllib": EvaluatedModel
                                       }
 
         print(f"Constructing the model {model_type} ...")
-
         if model_type in _factory_supported_classes:
             subclass = _factory_supported_classes.get(model_type)
             return subclass(model_uri, *args, **kwargs)

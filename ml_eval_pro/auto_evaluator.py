@@ -67,6 +67,9 @@ class AutoEvaluator:
 
         self.features_description = features_description
 
+        # print(self.test_predictions)
+        # print(self.test_predictions_prob)
+
     def __get_evaluation_metrics(self, target, predictions, predictions_prob):
         """
         Calculating the evaluation metrics.
@@ -222,7 +225,7 @@ class AutoEvaluator:
         """
         print("Evaluating the model GDPR Compliance ...")
 
-        model_ethical = ModelEthical(features_description=self.features_description)
+        # model_ethical = ModelEthical(features_description=self.features_description)
 
         model_reliability = ModelReliability(model=self.model_pipeline,
                                              X_test=self.test_dataset,
@@ -240,8 +243,7 @@ class AutoEvaluator:
                                                y_test=self.test_target,
                                                problem_type=self.model_type)
 
-        return (ModelEthicalSummary(model_ethical).get_summary() +
-                '\n' + ModelReliabilitySummary(model_reliability).get_summary() +
+        return (ModelReliabilitySummary(model_reliability).get_summary() +
                 '\n' + ModelRobustnessSummary(model_robustness).get_summary() +
                 '\n' + ModelTransparencySummary(model_transparency).get_summary())
 
@@ -269,14 +271,14 @@ class AutoEvaluator:
             'environmental_impact': self.__get_environmental_impact(),
 
             'model_bias': self.__get_model_bias(),
-
-            'model_variance': self.__get_model_variance(),
-
-            'ethical_analysis': self.__get_feature_importance(),
+            #
+            # 'model_variance': self.__get_model_variance(),
+            #
+            # 'ethical_analysis': self.__get_feature_importance(),
 
             'adversarial_test_cases': self.__get_adversarial_test_cases(),
 
-            'gdpr_compliance': self.__get_model_gdpr_compliance(),
+            # 'gdpr_compliance': self.__get_model_gdpr_compliance(),
 
             # 'machine_unlearning': self.__get_machine_unlearning_ability()
 
