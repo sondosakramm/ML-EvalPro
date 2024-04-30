@@ -37,7 +37,7 @@ class EvaluatedModelFactory:
                                       # "mlflow.sparkmllib": EvaluatedModel,
                                       # "mlflow.statsmodels": EvaluatedModel,
                                       "mlflow.lightgbm": EvaluatedModelLightGBM,
-                                      # "mlflow.catboost": EvaluatedModel,
+                                      "mlflow.catboost": EvaluatedModelLightGBM,
                                       "mlflow.xgboost": EvaluatedModelXGBoost
                                       }
 
