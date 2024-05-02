@@ -2,9 +2,8 @@ import mlflow
 
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.model.evaluated_model_h2o import EvaluatedModelH2O
-from ml_eval_pro.model.evaluated_model_pytorch import EvaluatedModelPytorch
 from ml_eval_pro.model.evaluated_model_sklearn import EvaluatedModelSKLearn
-from ml_eval_pro.model.evaluated_model_tensorflow import EvaluatedModelTensorflow
+from ml_eval_pro.model.evaluated_model_sparkmllib import EvaluatedModelSparkMLLib
 
 
 class EvaluatedModelFactory:
@@ -21,11 +20,11 @@ class EvaluatedModelFactory:
         """
         model_info = mlflow.models.get_model_info(model_uri)
         model_type = model_info.flavors[mlflow.pyfunc.FLAVOR_NAME]["loader_module"]
+        print(model_type)
 
         _factory_supported_classes = {"mlflow.sklearn": EvaluatedModelSKLearn,
-                                      # "mlflow.pytorch": EvaluatedModel,
                                       "mlflow.h2o": EvaluatedModelH2O,
-                                      # "mlflow.sparkmllib": EvaluatedModel
+                                      "mlflow.spark": EvaluatedModelSparkMLLib
                                       }
 
         print(f"Constructing the model {model_type} ...")

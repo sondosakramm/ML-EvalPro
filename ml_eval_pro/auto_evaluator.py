@@ -30,7 +30,8 @@ class AutoEvaluator:
 
     def __init__(self, model_uri, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
                  evaluation_metrics: list, train_dataset: pd.DataFrame = None,
-                 train_target: pd.Series = None, features_description: dict = None):
+                 train_target: pd.Series = None, features_description: dict = None,
+                 spark_session=None, spark_feature_col_name="features"):
         """
         Create an instance of the auto evaluator to get all the evaluation metrics.
         :param model_uri: the model uri.
@@ -40,11 +41,16 @@ class AutoEvaluator:
         :param evaluation_metrics: the evaluation metrics to be calculated.
         :param train_dataset: the train dataset features.
         :param train_target: the train dataset target.
-        :param features_description: the features description,
+        :param features_description: the features' description.
+        :param spark_session: the spark session (used in spark models only).
+        :param spark_feature_col_name: the spark features column name (used in spark models only).
          where key is the feature and the value is the description.
         :return: An instance of the auto evaluator.
         """
-        self.model_pipeline = EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type)
+        self.spark_feature_col_name = spark_feature_col_name
+        self.model_pipeline = EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type,
+                                                           spark_feature_col_name=spark_feature_col_name,
+                                                           spark_session=spark_session)
         self.model_type = model_type
         self.test_dataset = test_dataset
         self.test_target = test_target
@@ -271,14 +277,14 @@ class AutoEvaluator:
             'environmental_impact': self.__get_environmental_impact(),
 
             'model_bias': self.__get_model_bias(),
-            #
-            # 'model_variance': self.__get_model_variance(),
-            #
-            # 'ethical_analysis': self.__get_feature_importance(),
+
+            'model_variance': self.__get_model_variance(),
+
+            'ethical_analysis': self.__get_feature_importance(),
 
             'adversarial_test_cases': self.__get_adversarial_test_cases(),
 
-            # 'gdpr_compliance': self.__get_model_gdpr_compliance(),
+            'gdpr_compliance': self.__get_model_gdpr_compliance(),
 
             # 'machine_unlearning': self.__get_machine_unlearning_ability()
 
