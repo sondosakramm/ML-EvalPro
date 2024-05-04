@@ -1,5 +1,7 @@
 import mlflow
 
+from ml_eval_pro.model.evaluate_model_lightgbm import EvaluatedModelLightGBM
+from ml_eval_pro.model.evaluate_model_xgboost import EvaluatedModelXGBoost
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.model.evaluated_model_h2o import EvaluatedModelH2O
 from ml_eval_pro.model.evaluated_model_sklearn import EvaluatedModelSKLearn
@@ -24,7 +26,11 @@ class EvaluatedModelFactory:
 
         _factory_supported_classes = {"mlflow.sklearn": EvaluatedModelSKLearn,
                                       "mlflow.h2o": EvaluatedModelH2O,
-                                      "mlflow.spark": EvaluatedModelSparkMLLib
+                                      "mlflow.spark": EvaluatedModelSparkMLLib,
+                                      "mlflow.statsmodels": EvaluatedModel,
+                                      "mlflow.lightgbm": EvaluatedModelLightGBM,
+                                      "mlflow.catboost": EvaluatedModel,
+                                      "mlflow.xgboost": EvaluatedModel
                                       }
 
         print(f"Constructing the model {model_type} ...")
