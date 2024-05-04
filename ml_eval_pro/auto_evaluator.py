@@ -117,9 +117,9 @@ class AutoEvaluator:
         carbon_emission_predictions_per_kg_co = carbon_emission_calc.calculate_predictions()
 
         return {
-            'inference_time_val': inference_time_val,
+            'inference_time_val': float(inference_time_val),
             'inference_time_summary': InferenceSummary(inference_time).get_summary(),
-            'carbon_per_prediction': carbon_emission_carbon_per_prediction,
+            'carbon_per_prediction': float(carbon_emission_carbon_per_prediction),
             'carbon_prediction_per_kg': carbon_emission_predictions_per_kg_co,
             'carbon_summary': CarbonSummary(carbon_emission).get_summary()
         }
