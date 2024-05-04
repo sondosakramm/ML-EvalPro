@@ -1,5 +1,6 @@
 import time
 from decimal import getcontext
+from decimal import Decimal
 
 
 class InferenceTime:
@@ -28,12 +29,19 @@ class InferenceTime:
         - float: inference time in seconds.
 
         """
-        start_time = time.time()
+        getcontext().prec = 20
+
+        start_time = time.perf_counter_ns()
         self.model.predict(self.data)
-        end_time = time.time()
-        getcontext().prec = 10
-        seconds = (end_time - start_time) / len(self.data)
-        return seconds
+        end_time = time.perf_counter_ns()
+
+        sec = Decimal(end_time - start_time) / Decimal(1e9)
+
+        if sec > 0:
+            seconds = Decimal(sec) / Decimal(len(self.data))
+            return seconds
+        else:
+            return -1
 
     def calc_inference_time_hours(self):
         """
@@ -43,8 +51,8 @@ class InferenceTime:
         - float: inference time in hours.
 
         """
-        getcontext().prec = 10
-        hours = self.calc_inference_time_seconds() / 3600
+        getcontext().prec = 20
+        hours = self.calc_inference_time_seconds() / Decimal(3600)
         return hours
 
     def calc_inference_time_minutes(self):
@@ -55,8 +63,8 @@ class InferenceTime:
         - float: inference time in minutes.
 
         """
-        getcontext().prec = 10
-        minutes = self.calc_inference_time_seconds() / 60
+        getcontext().prec = 20
+        minutes = Decimal(self.calc_inference_time_seconds() / Decimal(60))
         return minutes
 
     def __str__(self):
@@ -64,5 +72,5 @@ class InferenceTime:
         Return:
         - str: a string of the inference time.
         """
-        msg = (f'The model average inference time per instance is {str(self.calc_inference_time_seconds())} seconds')
+        msg = f'The model average inference time per instance is {self.calc_inference_time_seconds():.10f} seconds'
         return msg
