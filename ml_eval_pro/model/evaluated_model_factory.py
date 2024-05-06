@@ -27,10 +27,6 @@ class EvaluatedModelFactory:
         _factory_supported_classes = {"mlflow.sklearn": EvaluatedModelSKLearn,
                                       "mlflow.h2o": EvaluatedModelH2O,
                                       "mlflow.spark": EvaluatedModelSparkMLLib,
-                                      "mlflow.statsmodels": EvaluatedModel,
-                                      "mlflow.lightgbm": EvaluatedModelLightGBM,
-                                      "mlflow.catboost": EvaluatedModel,
-                                      "mlflow.xgboost": EvaluatedModel
                                       }
 
         print(f"Constructing the model {model_type} ...")

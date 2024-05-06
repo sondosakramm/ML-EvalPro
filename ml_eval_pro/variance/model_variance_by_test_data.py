@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from ml_eval_pro.utils.validation import convert_dataframe_to_numpy
 from ml_eval_pro.variance.features_variance.categorical_features import CategoricalFeatures
@@ -43,25 +44,50 @@ class ModelVarianceByTestData(ModelVariance):
         super().__init__(model, convert_dataframe_to_numpy(X_test), convert_dataframe_to_numpy(y_test), None, None,
                          problem_type, metric)
 
+
+    def predict_with_column_names(self, data):
+        """
+        Predict using the model with column names.
+
+        Parameters:
+        data : np.ndarray
+            The feature matrix for prediction.
+
+        Returns:
+        np.ndarray or pd.DataFrame:
+            The predictions with column names.
+        """
+        if isinstance(data, np.ndarray):
+            data_df = pd.DataFrame(data, columns=self.X_test_with_features_name.columns)
+            return self.model.predict(data_df)
+        elif isinstance(data, pd.DataFrame):
+            return self.model.predict(data)
+        else:
+            raise ValueError("Data must be either a numpy array or a DataFrame.")
+
+
     def __get_numerical(self, feature_index, string_flag):
         """Get X_test after doing small perturbations on numerical features"""
         num = NumericalFeatures(self.X_test, feature_index, string_flag)
         step_added_arr, step_subtracted_arr = num.apply()
-        avg_predictions = np.mean([self.calculate_errors(self.y_test, self.model.predict(step_added_arr)),
-                                   self.calculate_errors(self.y_test, self.model.predict(step_subtracted_arr))], axis=0)
+        avg_predictions = np.mean([self.calculate_errors(self.y_test,
+                                                         self.predict_with_column_names(step_added_arr)),
+                                   self.calculate_errors(self.y_test,
+                                                         self.predict_with_column_names(step_subtracted_arr))], axis=0)
         self.model_avg_error.append(avg_predictions)
 
     def __get_categorical(self, feature_index):
         """Get X_test after doing small perturbations on categorical features"""
         cat = CategoricalFeatures(self.X_test, feature_index)
         cat_arr = cat.apply()
-        self.model_avg_error.append(self.calculate_errors(self.y_test, self.model.predict(cat_arr)))
+        self.model_avg_error.append(self.calculate_errors(self.y_test,
+                                                          self.predict_with_column_names(cat_arr)))
 
     def calculate_variance(self):
         """
         a method that calculate the variance.
         """
-        self.model_avg_error.append(self.calculate_errors(self.y_test, self.model.predict(self.X_test)))
+        self.model_avg_error.append(self.calculate_errors(self.y_test, self.predict_with_column_names(self.X_test)))
         for feature_index in range(self.X_test.shape[1]):
             feature = self.X_test[:, feature_index]
             if np.issubdtype(feature.dtype, np.integer) or np.issubdtype(feature.dtype, np.floating):

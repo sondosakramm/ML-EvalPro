@@ -38,7 +38,7 @@ class EvaluatedModel:
         if self.problem_type == "classification":
             # For binary classification with the probability of the positive class ONLY
             if len(predictions.shape) == 1 or predictions.shape[1] == 1:
-                predictions = np.concatenate([1-predictions, predictions], axis=1)
+                predictions = np.concatenate([1 - predictions.reshape(-1, 1), predictions.reshape(-1, 1)], axis=1)
 
             if predict_class:
                 return np.argmax(predictions, axis=1)
