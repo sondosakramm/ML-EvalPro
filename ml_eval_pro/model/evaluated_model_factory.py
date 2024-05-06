@@ -1,6 +1,5 @@
 import mlflow
 
-from ml_eval_pro.model.evaluate_model_xgboost import EvaluatedModelXGBoost
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.model.evaluated_model_catboost import EvaluatedModelCatBoost
 from ml_eval_pro.model.evaluated_model_h2o import EvaluatedModelH2O
