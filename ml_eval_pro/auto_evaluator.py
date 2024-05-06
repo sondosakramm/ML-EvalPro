@@ -29,8 +29,8 @@ from ml_eval_pro.variance.model_variance_by_train_test_data import ModelVariance
 class AutoEvaluator:
 
     def __init__(self, model_uri, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
-                 evaluation_metrics: list, train_dataset: pd.DataFrame = None,
-                 train_target: pd.Series = None, features_description: dict = None,
+                 evaluation_metrics: list, features_description: dict, dataset_context: str,
+                 train_dataset: pd.DataFrame = None, train_target: pd.Series = None,
                  spark_session=None, spark_feature_col_name="features"):
         """
         Create an instance of the auto evaluator to get all the evaluation metrics.
@@ -39,12 +39,12 @@ class AutoEvaluator:
         :param test_dataset: the test dataset features.
         :param test_target: the test dataset target.
         :param evaluation_metrics: the evaluation metrics to be calculated.
+        :param features_description: the features' description.
+        :param dataset_context: a description of the dataset context.
         :param train_dataset: the train dataset features.
         :param train_target: the train dataset target.
-        :param features_description: the features' description.
         :param spark_session: the spark session (used in spark models only).
         :param spark_feature_col_name: the spark features column name (used in spark models only).
-         where key is the feature and the value is the description.
         :return: An instance of the auto evaluator.
         """
         self.spark_feature_col_name = spark_feature_col_name
@@ -73,9 +73,7 @@ class AutoEvaluator:
             else get_num_classes(self.model_type, self.test_target)
 
         self.features_description = features_description
-
-        # print(self.test_predictions)
-        # print(self.test_predictions_prob)
+        self.dataset_context = dataset_context
 
     def __get_evaluation_metrics(self, target, predictions, predictions_prob):
         """
@@ -175,7 +173,8 @@ class AutoEvaluator:
         :return: a dictionary of the biased features and summary in the model.
         """
         print("Evaluating the model ethical issues according to the features importance ...")
-        ethical_analysis = EthicalAnalysis(self.model_pipeline, self.test_dataset, self.features_description)
+        ethical_analysis = EthicalAnalysis(self.model_pipeline, self.test_dataset,
+                                           self.features_description, self.dataset_context)
         feature_importance, unethical_features = ethical_analysis()
 
         return {
@@ -232,7 +231,9 @@ class AutoEvaluator:
         """
         print("Evaluating the model GDPR Compliance ...")
 
-        # model_ethical = ModelEthical(features_description=self.features_description)
+        model_ethical = ModelEthical(features_description=self.features_description,
+                                     dataset_context=self.dataset_context,
+                                     X_test=self.test_dataset)
 
         model_reliability = ModelReliability(model=self.model_pipeline,
                                              X_test=self.test_dataset,
@@ -251,6 +252,7 @@ class AutoEvaluator:
                                                problem_type=self.model_type)
 
         return (ModelReliabilitySummary(model_reliability).get_summary() +
+                '\n' + ModelEthicalSummary(model_ethical).get_summary() +
                 '\n' + ModelRobustnessSummary(model_robustness).get_summary() +
                 '\n' + ModelTransparencySummary(model_transparency).get_summary())
 
@@ -279,7 +281,7 @@ class AutoEvaluator:
 
             'model_bias': self.__get_model_bias(),
 
-            # 'model_variance': self.__get_model_variance(),
+            'model_variance': self.__get_model_variance(),
 
             'ethical_analysis': self.__get_feature_importance(),
 
