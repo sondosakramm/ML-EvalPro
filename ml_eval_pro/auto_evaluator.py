@@ -117,8 +117,8 @@ class AutoEvaluator:
         """
         print("Evaluating the model environmental impact ...")
         inference_time = InferenceTime(self.model_pipeline, self.test_dataset)
-        inference_time_val = (inference_time.calc_inference_time_hours()
-                              + inference_time.calc_inference_time_minutes()
+        inference_time_val = (inference_time.calc_inference_time_hours() * 360
+                              + inference_time.calc_inference_time_minutes() * 60
                               + inference_time.calc_inference_time_seconds())
 
         carbon_emission = Carbon(self.model_pipeline, self.test_dataset)

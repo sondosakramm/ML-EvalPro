@@ -40,7 +40,6 @@ class EvaluatedModel:
             if len(predictions.shape) == 1 or predictions.shape[1] == 1:
                 predictions = np.concatenate([1-predictions.reshape(-1, 1),
                                               predictions.reshape(-1, 1)], axis=1).reshape(-1, 2)
-
             if predict_class:
                 return np.argmax(predictions, axis=1)
 
