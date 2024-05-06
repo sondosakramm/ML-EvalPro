@@ -1,5 +1,6 @@
 import mlflow
 
+from ml_eval_pro.model.evaluate_model_xgboost import EvaluatedModelXGBoost
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.model.evaluated_model_h2o import EvaluatedModelH2O
 from ml_eval_pro.model.evaluated_model_sklearn import EvaluatedModelSKLearn
@@ -20,7 +21,6 @@ class EvaluatedModelFactory:
         """
         model_info = mlflow.models.get_model_info(model_uri)
         model_type = model_info.flavors[mlflow.pyfunc.FLAVOR_NAME]["loader_module"]
-        print(model_type)
 
         _factory_supported_classes = {"mlflow.sklearn": EvaluatedModelSKLearn,
                                       "mlflow.h2o": EvaluatedModelH2O,

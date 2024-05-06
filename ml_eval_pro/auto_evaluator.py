@@ -48,9 +48,10 @@ class AutoEvaluator:
         :return: An instance of the auto evaluator.
         """
         self.spark_feature_col_name = spark_feature_col_name
-        self.model_pipeline = EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type,
-                                                           spark_feature_col_name=spark_feature_col_name,
-                                                           spark_session=spark_session)
+        self.model_pipeline = EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type) \
+            if spark_session is None else EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type,
+                                                                       spark_feature_col_name=spark_feature_col_name,
+                                                                       spark_session=spark_session)
         self.model_type = model_type
         self.test_dataset = test_dataset
         self.test_target = test_target
@@ -278,7 +279,7 @@ class AutoEvaluator:
 
             'model_bias': self.__get_model_bias(),
 
-            'model_variance': self.__get_model_variance(),
+            # 'model_variance': self.__get_model_variance(),
 
             'ethical_analysis': self.__get_feature_importance(),
 
