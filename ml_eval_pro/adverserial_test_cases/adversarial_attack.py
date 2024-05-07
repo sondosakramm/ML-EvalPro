@@ -38,7 +38,7 @@ class AdversarialAttack(ABC):
             self.num_classes = np.unique(self.test_target_features).shape[0]
 
         # Splitting the test data if there is no training data
-        if not isinstance(train_input_features, np.ndarray):
+        if train_input_features is None:
             split_size = int(0.8 * self.test_target_features.shape[0])
             self.train_input_features = test_input_features.iloc[:split_size]
             self.train_target_features = test_target_features[:split_size]
