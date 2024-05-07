@@ -244,6 +244,8 @@ class AutoEvaluator:
         model_robustness = ModelRobustness(model=self.model_pipeline,
                                            X_test=self.test_dataset,
                                            y_test=self.test_target,
+                                           X_train=self.train_dataset,
+                                           y_train=self.train_target,
                                            problem_type=self.model_type)
 
         model_transparency = ModelTransparency(model=self.model_pipeline,

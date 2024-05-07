@@ -1,5 +1,4 @@
 import pandas as pd
-from langchain.output_parsers import ResponseSchema
 
 from ml_eval_pro.ethical_analysis.feature_importance.feature_importance_factory import \
     FeatureImportanceFactory
@@ -78,23 +77,14 @@ class EthicalAnalysis:
          :return: the unethical features and the reason of being unethical.
          """
         LLMSingleton()
-        unethical_features = {}
-        for feature in features_descriptions.keys():
-            print(f"Evaluating the feature {feature} ...")
-            desc = features_descriptions[feature]
 
-            question = f"Given the dataset context: {dataset_context} and the following sample of each feature: {dataset_sample_str}, \
-            the feature '{feature}' with description '{desc}' is used in training a machine learning model \
-             and it is one of the most important features contributing in predictions. Is it ethical and fair to use?"
+        features_str = features_descriptions.__str__()
 
-            response_schema = [
-                ResponseSchema(name="answer", description="answer to the user's question", type='boolean'),
-                ResponseSchema(name="reason", description="short reason of the answer of the user's question")
-            ]
+        question = f"Given the dataset context: {dataset_context} and the following sample of each feature: {dataset_sample_str}, \
+        along with the descriptions {features_str[1:len(features_str) - 1]}. They are used in training a machine learning model \
+        and they are one of the most important features contributing in predictions. In this context, determine which feature(s) are unethical to use and a short reason for the answer. \
+        Answer the question with json format only where the key is the feature and the value is the reason. The answer should not include any additional notes."
 
-            curr_res = LLMSingleton.execute_prompt(question, response_schema)
-
-            if not curr_res['answer']:
-                unethical_features[feature] = curr_res['reason']
+        unethical_features = LLMSingleton.execute_prompt(question)
 
         return unethical_features
