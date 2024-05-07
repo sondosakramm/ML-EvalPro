@@ -70,6 +70,9 @@ class ModelTransparency(GdprCompliance):
 
     def check_explain_ability(self):
         """Check the explain-ability of the model based on its type."""
+
+        model_algorithm = self.model.__dict__["model"]
+
         explainable_models = [LinearRegression, LogisticRegression, Ridge, Lasso, ElasticNet, DecisionTreeClassifier,
                               DecisionTreeRegressor, ExtraTreeClassifier, ExtraTreeRegressor]
 
@@ -82,11 +85,11 @@ class ModelTransparency(GdprCompliance):
                           XGBRegressor,
                           StackingClassifier, StackingRegressor]
 
-        if any(isinstance(self.model, model_type) for model_type in explainable_models):
+        if any(isinstance(model_algorithm, model_type) for model_type in explainable_models):
             return "A"
-        elif any(isinstance(self.model, model_type) for model_type in partially_explainable_models):
+        elif any(isinstance(model_algorithm, model_type) for model_type in partially_explainable_models):
             return "B"
-        elif any(isinstance(self.model, model_type) for model_type in complex_models):
+        elif any(isinstance(model_algorithm, model_type) for model_type in complex_models):
             return "C"
         else:
             return "I"

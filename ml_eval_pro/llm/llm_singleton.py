@@ -22,9 +22,17 @@ class LLMSingleton:
         :return: the instantiated model.
         """
         print("Creating the LLM model ...")
+
+        config = {"temperature": 0.0,
+                  "max_new_tokens": 128,
+                  "batch_size": 256,
+                  "top_k": 1,
+                  "context_length": 6000}
+
         llm = CTransformers(model='TheBloke/Llama-2-7B-Chat-GGUF',
-                            model_file='llama-2-7b-chat.Q4_0.gguf',
-                            temperature=0.0, max_new_tokens=128, batch_size=256, top_k=1)
+                            model_file='llama-2-7b-chat.Q4_0.gguf', config=config)
+
+        print(llm.config)
 
         model = Llama2Chat(llm=llm)
 

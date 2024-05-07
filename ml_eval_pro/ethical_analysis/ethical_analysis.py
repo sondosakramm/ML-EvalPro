@@ -52,7 +52,7 @@ class EthicalAnalysis:
         :param dataset: the dataset given.
         :return: the ethical perspective of the given features.
         """
-        dataset_sample = dataset[:10, :] if dataset.shape[0] >= 10 else dataset
+        dataset_sample = dataset.iloc[:10, :] if dataset.shape[0] >= 10 else dataset
 
         dataset_sample_str = dataset_sample.to_dict('list').__str__()
 
