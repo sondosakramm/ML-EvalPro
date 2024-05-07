@@ -3,6 +3,7 @@ import mlflow
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.model.evaluated_model_catboost import EvaluatedModelCatBoost
 from ml_eval_pro.model.evaluated_model_h2o import EvaluatedModelH2O
+from ml_eval_pro.model.evaluated_model_onnx import EvaluatedModelONNX
 from ml_eval_pro.model.evaluated_model_sklearn import EvaluatedModelSKLearn
 from ml_eval_pro.model.evaluated_model_sparkmllib import EvaluatedModelSparkMLLib
 
