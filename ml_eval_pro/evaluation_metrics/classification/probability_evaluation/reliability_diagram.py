@@ -24,7 +24,7 @@ class ReliabilityDiagram(ProbabilityClassification):
         n = confidence.shape[0]
         binning_ranges = np.linspace(0, 1, self.n_bins + 1)
         for i in range(1, self.n_bins + 1):
-            b_indices = np.logical_and(confidence >= binning_ranges[i - 1], confidence < binning_ranges[i])
+            b_indices = np.logical_and(confidence > binning_ranges[i - 1], confidence <= binning_ranges[i])
             b_size = b_indices.sum()
 
             if b_size > 0:

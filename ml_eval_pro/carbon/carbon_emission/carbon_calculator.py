@@ -27,7 +27,6 @@ class CarbonCalculator:
         - float: carbon emissions per prediction.
 
         """
-        print(self.carbon.inference_time)
         carbon_per_prediction = (Decimal(self.carbon.energy_generator_value) *
                                  Decimal(self.carbon.cpu_value) * self.carbon.inference_time)
         return carbon_per_prediction
