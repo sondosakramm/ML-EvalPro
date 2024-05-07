@@ -11,7 +11,7 @@ class ModelReliability(GdprCompliance):
         self.prediction = None
 
     def get_metric(self):
-        self.prediction = self.model.predict_proba(self.X_test)
+        self.prediction = self.model.predict(self.X_test, predict_class=False)
         evaluator = EvaluatorsFactory.get_evaluator("expected calibration error",
                                                     self.y_test, self.prediction,
                                                     self.num_of_classes, self.n_bins)

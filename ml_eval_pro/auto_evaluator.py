@@ -11,6 +11,7 @@ from ml_eval_pro.gdpr.gdpr_rules.model_ethical import ModelEthical
 from ml_eval_pro.gdpr.gdpr_rules.model_reliability import ModelReliability
 from ml_eval_pro.gdpr.gdpr_rules.model_robustness import ModelRobustness
 from ml_eval_pro.gdpr.gdpr_rules.model_transparency import ModelTransparency
+from ml_eval_pro.model.evaluated_model_factory import EvaluatedModelFactory
 from ml_eval_pro.summary.modules_summary.bias_summary import BiasSummary
 from ml_eval_pro.summary.modules_summary.carbon_summary import CarbonSummary
 from ml_eval_pro.summary.modules_summary.inference_summary import InferenceSummary
@@ -27,23 +28,30 @@ from ml_eval_pro.variance.model_variance_by_train_test_data import ModelVariance
 
 class AutoEvaluator:
 
-    def __init__(self, model_pipeline, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
-                 evaluation_metrics: list, train_dataset: pd.DataFrame = None,
-                 train_target: pd.Series = None, features_description: dict = None):
+    def __init__(self, model_uri, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
+                 evaluation_metrics: list, features_description: dict, dataset_context: str,
+                 train_dataset: pd.DataFrame = None, train_target: pd.Series = None,
+                 spark_session=None, spark_feature_col_name="features"):
         """
         Create an instance of the auto evaluator to get all the evaluation metrics.
-        :param model_pipeline: the model pipeline.
+        :param model_uri: the model uri.
         :param model_type: the model problem type.
         :param test_dataset: the test dataset features.
         :param test_target: the test dataset target.
         :param evaluation_metrics: the evaluation metrics to be calculated.
+        :param features_description: the features' description.
+        :param dataset_context: a description of the dataset context.
         :param train_dataset: the train dataset features.
         :param train_target: the train dataset target.
-        :param features_description: the features description,
-         where key is the feature and the value is the description.
+        :param spark_session: the spark session (used in spark models only).
+        :param spark_feature_col_name: the spark features column name (used in spark models only).
         :return: An instance of the auto evaluator.
         """
-        self.model_pipeline = model_pipeline
+        self.spark_feature_col_name = spark_feature_col_name
+        self.model_pipeline = EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type) \
+            if spark_session is None else EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type,
+                                                                       spark_feature_col_name=spark_feature_col_name,
+                                                                       spark_session=spark_session)
         self.model_type = model_type
         self.test_dataset = test_dataset
         self.test_target = test_target
@@ -56,15 +64,16 @@ class AutoEvaluator:
             else self.model_pipeline.predict(self.train_dataset)
 
         self.test_predictions_prob = None if self.model_type == "regression" \
-            else self.model_pipeline.predict_proba(self.test_dataset)
+            else self.model_pipeline.predict(self.test_dataset, predict_class=False)
 
         self.train_predictions_prob = None if self.model_type == "regression" or self.train_dataset is None \
-            else self.model_pipeline.predict_proba(self.train_dataset)
+            else self.model_pipeline.predict(self.train_dataset, predict_class=False)
 
         self.num_classes = -1 if self.model_type == "regression" \
             else get_num_classes(self.model_type, self.test_target)
 
         self.features_description = features_description
+        self.dataset_context = dataset_context
 
     def __get_evaluation_metrics(self, target, predictions, predictions_prob):
         """
@@ -106,8 +115,8 @@ class AutoEvaluator:
         """
         print("Evaluating the model environmental impact ...")
         inference_time = InferenceTime(self.model_pipeline, self.test_dataset)
-        inference_time_val = (inference_time.calc_inference_time_hours()
-                              + inference_time.calc_inference_time_minutes()
+        inference_time_val = (inference_time.calc_inference_time_hours() * 360
+                              + inference_time.calc_inference_time_minutes() * 60
                               + inference_time.calc_inference_time_seconds())
 
         carbon_emission = Carbon(self.model_pipeline, self.test_dataset)
@@ -134,7 +143,7 @@ class AutoEvaluator:
         biased_features = model_bias()
 
         return {
-            "biased_features": np.array(biased_features)[:, 0],
+            "biased_features": [] if len(biased_features) == 0 else np.array(biased_features)[:, 0],
             "bias_summary": BiasSummary(model_bias).get_summary()
         }
 
@@ -164,7 +173,8 @@ class AutoEvaluator:
         :return: a dictionary of the biased features and summary in the model.
         """
         print("Evaluating the model ethical issues according to the features importance ...")
-        ethical_analysis = EthicalAnalysis(self.model_pipeline, self.test_dataset, self.features_description)
+        ethical_analysis = EthicalAnalysis(self.model_pipeline, self.test_dataset,
+                                           self.features_description, self.dataset_context)
         feature_importance, unethical_features = ethical_analysis()
 
         return {
@@ -221,7 +231,9 @@ class AutoEvaluator:
         """
         print("Evaluating the model GDPR Compliance ...")
 
-        model_ethical = ModelEthical(features_description=self.features_description)
+        model_ethical = ModelEthical(features_description=self.features_description,
+                                     dataset_context=self.dataset_context,
+                                     X_test=self.test_dataset)
 
         model_reliability = ModelReliability(model=self.model_pipeline,
                                              X_test=self.test_dataset,
@@ -239,8 +251,8 @@ class AutoEvaluator:
                                                y_test=self.test_target,
                                                problem_type=self.model_type)
 
-        return (ModelEthicalSummary(model_ethical).get_summary() +
-                '\n' + ModelReliabilitySummary(model_reliability).get_summary() +
+        return (ModelReliabilitySummary(model_reliability).get_summary() +
+                '\n' + ModelEthicalSummary(model_ethical).get_summary() +
                 '\n' + ModelRobustnessSummary(model_robustness).get_summary() +
                 '\n' + ModelTransparencySummary(model_transparency).get_summary())
 
@@ -277,6 +289,6 @@ class AutoEvaluator:
 
             'gdpr_compliance': self.__get_model_gdpr_compliance(),
 
-            'machine_unlearning': self.__get_machine_unlearning_ability()
+            # 'machine_unlearning': self.__get_machine_unlearning_ability()
 
         }

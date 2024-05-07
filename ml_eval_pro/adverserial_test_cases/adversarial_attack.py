@@ -26,27 +26,30 @@ class AdversarialAttack(ABC):
         self.model = model
         self.not_robust = None
 
-        self.test_input_features = convert_dataframe_to_numpy(test_input_features)
         self.test_target_features = convert_dataframe_to_numpy(test_target_features)
-
-        self.train_input_features = convert_dataframe_to_numpy(train_input_features)
         self.train_target_features = convert_dataframe_to_numpy(train_target_features)
 
-        # Splitting the test data if there is no training data
-        if not isinstance(self.train_input_features, np.ndarray):
-            split_size = int(0.8 * self.test_target_features.shape[0])
-            self.train_input_features = self.test_input_features[:split_size]
-            self.train_target_features = self.test_target_features[:split_size]
-            self.test_input_features = self.test_input_features[split_size:]
-            self.test_target_features = self.test_target_features[split_size:]
-
-        self.train_model_predictions = self.model.predict(self.train_input_features)
-        self.test_model_predictions = self.model.predict(self.test_input_features)
+        self.train_input_features = train_input_features
+        self.test_input_features = test_input_features
 
         # Get the number of classes from the dataset given if the number of classes is not given
         self.num_classes = num_classes
         if self.model_type == 'classification' and num_classes is None:
-            self.num_classes = np.unique(self.train_target_features).shape[0]
+            self.num_classes = np.unique(self.test_target_features).shape[0]
+
+        # Splitting the test data if there is no training data
+        if not isinstance(train_input_features, np.ndarray):
+            split_size = int(0.8 * self.test_target_features.shape[0])
+            self.train_input_features = test_input_features.iloc[:split_size]
+            self.train_target_features = test_target_features[:split_size]
+            self.test_input_features = test_input_features[split_size:]
+            self.test_target_features = test_target_features.iloc[split_size:]
+
+        self.train_model_predictions = self.model.predict(self.train_input_features)
+        self.test_model_predictions = self.model.predict(self.test_input_features)
+
+        self.train_input_features = convert_dataframe_to_numpy(self.train_input_features)
+        self.test_input_features = convert_dataframe_to_numpy(self.test_input_features)
 
     @abstractmethod
     def generate(self) -> np.ndarray:
