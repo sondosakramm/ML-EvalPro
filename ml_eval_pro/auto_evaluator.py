@@ -96,7 +96,7 @@ class AutoEvaluator:
                                                               num_of_classes=self.num_classes).measure()
         return res
 
-    def __get_reliability_diagram(self):
+    def _get_reliability_diagram(self):
         """
         Getting the reliability diagram.
         :return: the reliability diagram values to be displayed in the graph.
@@ -246,19 +246,15 @@ class AutoEvaluator:
                                            y_test=self.test_target,
                                            problem_type=self.model_type)
 
-        # model_transparency = ModelTransparency(model=self.model_pipeline,
-        #                                        X_test=self.test_dataset,
-        #                                        y_test=self.test_target,
-        #                                        problem_type=self.model_type)
+        model_transparency = ModelTransparency(model=self.model_pipeline,
+                                               X_test=self.test_dataset,
+                                               y_test=self.test_target,
+                                               problem_type=self.model_type)
 
         return (ModelReliabilitySummary(model_reliability).get_summary() +
                 '\n' + ModelEthicalSummary(model_ethical).get_summary() +
-                '\n' + ModelRobustnessSummary(model_robustness).get_summary())
-
-        # return(ModelReliabilitySummary(model_reliability).get_summary() +
-        #       '\n' + ModelEthicalSummary(model_ethical).get_summary() +
-        #       '\n' + ModelRobustnessSummary(model_robustness).get_summary() +
-        #       '\n' + ModelTransparencySummary(model_transparency).get_summary())
+                '\n' + ModelRobustnessSummary(model_robustness).get_summary() +
+                '\n' + ModelTransparencySummary(model_transparency).get_summary())
 
     def _get_machine_unlearning_ability(self):
         """
@@ -273,25 +269,25 @@ class AutoEvaluator:
         :return: a dictionary of all the evaluation values in auto evaluator.
         """
         return {
-            'evaluation_metrics_test': self.__get_evaluation_metrics(self.test_target, self.test_predictions,
-                                                                     self.test_predictions_prob),
+            'evaluation_metrics_test': self._get_evaluation_metrics(self.test_target, self.test_predictions,
+                                                                    self.test_predictions_prob),
 
             'evaluation_metrics_train': {} if self.train_dataset is None
-            else self.__get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
+            else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
 
-            'reliability_diagram': self.__get_reliability_diagram(),
+            'reliability_diagram': self._get_reliability_diagram(),
 
-            'environmental_impact': self.__get_environmental_impact(),
+            'environmental_impact': self._get_environmental_impact(),
 
-            'model_bias': self.__get_model_bias(),
+            'model_bias': self._get_model_bias(),
 
-            'model_variance': self.__get_model_variance(),
+            'model_variance': self._get_model_variance(),
 
-            'ethical_analysis': self.__get_feature_importance(),
+            'ethical_analysis': self._get_feature_importance(),
 
-            'adversarial_test_cases': self.__get_adversarial_test_cases(),
+            'adversarial_test_cases': self._get_adversarial_test_cases(),
 
-            'gdpr_compliance': self.__get_model_gdpr_compliance(),
+            'gdpr_compliance': self._get_model_gdpr_compliance(),
 
             # 'machine_unlearning': self.__get_machine_unlearning_ability()
 
