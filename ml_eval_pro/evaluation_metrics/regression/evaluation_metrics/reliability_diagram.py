@@ -28,8 +28,12 @@ class Calibration(RegressionEvaluator):
             actual_bin_range = self.target[
                 np.logical_and(self.target >= predictions_binning_ranges[i - 1], self.target < predictions_binning_ranges[i])]
 
+            if len(actual_bin_range) == 0:
+                continue
+
             # Getting the minimum value of the current bin from the maximum of the previous bin to get a proper line
             min_actual = self.target.min() if i == 1 else max_actual
+
             max_actual = max(actual_bin_range)
 
             actual_binning_ranges = np.append(actual_binning_ranges, min_actual)

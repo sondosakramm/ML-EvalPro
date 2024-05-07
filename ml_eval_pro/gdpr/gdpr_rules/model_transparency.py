@@ -61,6 +61,7 @@ class ModelTransparency(GdprCompliance):
     def check_significance(self):
         """Check if the average entropy is below a predefined significance threshold."""
         significant = YamlReader(os.path.join(os.path.curdir,
+                                              "ml_eval_pro",
                                               "config_files",
                                               "system_config.yaml")).get("thresholds")["shap_significance"]
         if self.avg_entropy < significant:

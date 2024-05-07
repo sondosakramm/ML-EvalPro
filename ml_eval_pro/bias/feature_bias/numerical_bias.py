@@ -1,6 +1,7 @@
 import pandas as pd
 
 from ml_eval_pro.bias.feature_bias.feature_bias import FeatureBias
+from ml_eval_pro.utils.optimal_clusters import calculate_optimal_bins
 
 
 class NumericalBias(FeatureBias):
@@ -20,8 +21,7 @@ class NumericalBias(FeatureBias):
         :param significance: the significance value to measure bias.
         """
         super().__init__(model, model_type, target, features, feature_name, significance)
-
-        self.no_of_bins = 10
+        self.num_bins = calculate_optimal_bins(self.features[self.feature_name].to_numpy())
         self.features_binned = self.__get_binning_indices()
 
     def check_bias(self, *args):
@@ -39,13 +39,13 @@ class NumericalBias(FeatureBias):
         ordered_feature = self.features[self.feature_name].sort_values()
         feature_binned = self.features[self.feature_name].copy()
 
-        bin_instances_size = int(self.features.size / self.no_of_bins)
+        bin_instances_size = int(self.features.size / self.num_bins)
 
-        for i in range(self.no_of_bins):
+        for i in range(self.num_bins):
             start_index = i * bin_instances_size
             end_index = (i + 1) * bin_instances_size
 
-            if ordered_feature.size < end_index or i == self.no_of_bins - 1:
+            if ordered_feature.size < end_index or i == self.num_bins - 1:
                 end_index = ordered_feature.size
 
             feature_binned.replace(ordered_feature[start_index:end_index].tolist(), i, inplace=True)

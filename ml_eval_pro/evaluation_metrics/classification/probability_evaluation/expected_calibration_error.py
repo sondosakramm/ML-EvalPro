@@ -2,6 +2,7 @@ import numpy as np
 
 from ml_eval_pro.evaluation_metrics.classification.probability_evaluation.probability_evaluation import \
     ProbabilityClassification
+from ml_eval_pro.evaluation_metrics.classification.probability_evaluation.reliability_diagram import ReliabilityDiagram
 
 
 class ECEMetric(ProbabilityClassification):
@@ -16,31 +17,11 @@ class ECEMetric(ProbabilityClassification):
         """
         ece = np.array([])
 
-        confidence = self.__get_model_confidence()
-        accuracy = (self.target == self.prediction) * 1
+        confidence_vals, accuracy_vals, weights = ReliabilityDiagram(self.target, self.prediction_prob,
+                                                                     self.num_of_classes, self.n_bins).measure()
 
-        n = confidence.shape[0]
-        binning_ranges = np.linspace(0, 1, self.n_bins + 1)
-        for i in range(1, self.n_bins + 1):
-            b_indices = np.logical_and(confidence >= binning_ranges[i - 1], confidence < binning_ranges[i])
-            b_size = b_indices.sum()
+        for i in range(len(confidence_vals)):
+            b_ece = abs(confidence_vals[i] - accuracy_vals[i]) * weights[i]
+            ece = np.append(ece, [b_ece])
 
-            if b_size > 0:
-                b_weight = b_size / n
-                b_conf = confidence[b_indices]
-                b_acc = accuracy[b_indices]
-
-                b_conf_avg = np.mean(b_conf)
-                b_acc_avg = np.mean(b_acc)
-
-                b_ece = abs(b_conf_avg - b_acc_avg) * b_weight
-
-                ece = np.append(ece, [b_ece])
         return ece.sum()
-
-    def __get_model_confidence(self):
-        """
-        Get the confidence of each value of the prediction.
-        :return: the confidence values.
-        """
-        return np.max(self.prediction_prob, axis=1)

@@ -13,5 +13,5 @@ class CarbonSummary(SummaryGenerator):
                 f'power consumptions is {self.carbon.cpu_value} Kw,'
                 f', assuming that the energy generator is {self.carbon.energy_generator}, '
                 f'and it\'s power consumption is {self.carbon.energy_generator_value} KgCO2 so it will generate'
-                f' {CarbonCalculator(self).calculate_carbon()} CO2 for a single prediction, '
-                f'{CarbonCalculator(self).calculate_predictions()} predictions will generate 1 Kg Co2')
+                f' {CarbonCalculator(self.carbon).calculate_carbon()} CO2 for a single prediction, '
+                f'{CarbonCalculator(self.carbon).calculate_predictions()} predictions will generate 1 Kg Co2')

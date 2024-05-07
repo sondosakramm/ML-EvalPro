@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.calibration import calibration_curve
 
 from ml_eval_pro.evaluation_metrics.classification.probability_evaluation.probability_evaluation import \
     ProbabilityClassification
@@ -10,34 +9,41 @@ class ReliabilityDiagram(ProbabilityClassification):
     A class for evaluating the model using Reliability Diagram evaluation metric.
     """
 
-    def __init__(self, target: np.ndarray, predictions_prob: np.ndarray, number_of_classes: int=2,
-                 n_bins: int=5, display: bool=False):
-        """
-        Initializing reliability diagram evaluation metric.
-        :param target: the target class true values.
-        :param predictions_prob: the prediction probability of the positive class.
-        :param number_of_classes: the number of classes in this model.
-        :param n_bins: the number of bins needed.
-        :param display: display the reliability diagram plot.
-        """
-        super().__init__(target, predictions_prob, number_of_classes, n_bins)
-        self.display = display
-
     def measure(self):
         """
-        Evaluating the model with reliability diagram.
-        :return: the reliability diagram bins values.
+        Evaluating the model with ECE.
+        :return: the ECE value.
         """
-        prediction_prob = np.copy(self.prediction_prob)
+        confidence_vals = []
+        accuracy_vals = []
+        weights = []
 
-        if self.num_of_classes == 2:
-            prediction_prob = prediction_prob[:,1]
+        confidence = self.__get_model_confidence()
+        accuracy = (self.target == self.prediction) * 1
 
-            return calibration_curve(self.target, prediction_prob, n_bins=self.n_bins)
+        n = confidence.shape[0]
+        binning_ranges = np.linspace(0, 1, self.n_bins + 1)
+        for i in range(1, self.n_bins + 1):
+            b_indices = np.logical_and(confidence >= binning_ranges[i - 1], confidence < binning_ranges[i])
+            b_size = b_indices.sum()
 
-        calibration_info = []
-        for class_index in range(self.num_of_classes):
-            calibration_info.append(calibration_curve(self.target == class_index, self.prediction_prob[:, class_index],
-                                                 n_bins=self.n_bins))
+            if b_size > 0:
+                b_weight = b_size / n
+                b_conf = confidence[b_indices]
+                b_acc = accuracy[b_indices]
 
-        return calibration_info
+                b_conf_avg = np.mean(b_conf)
+                b_acc_avg = np.mean(b_acc)
+
+                confidence_vals.append(b_conf_avg)
+                accuracy_vals.append(b_acc_avg)
+                weights.append(b_weight)
+
+        return confidence_vals, accuracy_vals, weights
+
+    def __get_model_confidence(self):
+        """
+        Get the confidence of each value of the prediction.
+        :return: the confidence values.
+        """
+        return np.max(self.prediction_prob, axis=1)

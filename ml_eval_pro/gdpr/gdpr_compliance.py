@@ -5,7 +5,7 @@ class GdprCompliance(ABC):
     """A base class for assessing GDPR compliance of machine learning models."""
 
     def __init__(self, model=None, X_test=None, y_test=None, problem_type='classification', X_train=None, y_train=None,
-                 features_description: dict = None, num_of_classes: int = 2, n_bins: int = 5):
+                 features_description: dict = None, dataset_context: str = None, num_of_classes: int = 2, n_bins: int = 5):
         """
         Parameters:
         - model: The trained machine learning model to be evaluated for GDPR compliance (optional).
@@ -16,6 +16,7 @@ class GdprCompliance(ABC):
         - X_train: The feature matrix of the training dataset (optional).
         - y_train: The target values of the training dataset (optional).
         - features_description: a short description for each feature. (optional)
+        - dataset_context: a description for the dataset context. (optional)
         - num_of_classes: Number of classes (only for classification tasks) (default=2).
         - n_bins: the number of bins needed (default=5).
 
@@ -39,3 +40,4 @@ class GdprCompliance(ABC):
         self.num_of_classes = num_of_classes
         self.n_bins = n_bins
         self.features_description = features_description
+        self.dataset_context = dataset_context

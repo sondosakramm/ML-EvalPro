@@ -14,15 +14,16 @@ variance:
 thresholds:
   shap_significance: 0.05
   ece_threshold: 0.5
+  bias_threshold: 0.05
 
 adversarial_attack:
   learning_rate: 1e-1
   max_iter: 20
   nb_parallel: 1
-  min_num_bins: 5
-  min_number_instances: 100
-  num_bins_percentage: 0.1
   threshold: 0.05
+  #  min_num_bins: 5
+  #  min_number_instances: 100
+  #  num_bins_percentage: 0.1
 
 
 
