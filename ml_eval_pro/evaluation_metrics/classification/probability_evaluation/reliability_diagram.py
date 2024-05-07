@@ -14,9 +14,9 @@ class ReliabilityDiagram(ProbabilityClassification):
         Evaluating the model with ECE.
         :return: the ECE value.
         """
-        confidence_vals = []
-        accuracy_vals = []
-        weights = []
+        confidence_vals = np.zeros(self.n_bins)
+        accuracy_vals = np.zeros(self.n_bins)
+        weights = np.zeros(self.n_bins)
 
         confidence = self.__get_model_confidence()
         accuracy = (self.target == self.prediction) * 1
@@ -35,9 +35,10 @@ class ReliabilityDiagram(ProbabilityClassification):
                 b_conf_avg = np.mean(b_conf)
                 b_acc_avg = np.mean(b_acc)
 
-                confidence_vals.append(b_conf_avg)
-                accuracy_vals.append(b_acc_avg)
-                weights.append(b_weight)
+                confidence_vals[i-1] = b_conf_avg
+                accuracy_vals[i-1] = b_acc_avg
+
+                weights[i-1] = b_weight
 
         return confidence_vals, accuracy_vals, weights
 

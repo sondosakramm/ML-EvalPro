@@ -47,9 +47,9 @@ class EvaluatorsFactory:
             elif evaluation_metric == 'auc':
                 return AUC(target, prediction, num_of_classes, n_bins)
             elif evaluation_metric == 'expected calibration error':
-                return ECEMetric(target, prediction, num_of_classes, n_bins)
+                return ECEMetric(target, prediction, num_of_classes)
             elif evaluation_metric == 'classification reliability evaluation':
-                return ReliabilityDiagram(target, prediction, num_of_classes, n_bins)
+                return ReliabilityDiagram(target, prediction, num_of_classes)
             elif evaluation_metric == 'regression reliability evaluation':
                 return Calibration(target, prediction, n_bins)
             elif evaluation_metric == 'accuracy':
