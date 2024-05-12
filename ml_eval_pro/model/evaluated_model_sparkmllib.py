@@ -10,15 +10,16 @@ class EvaluatedModelSparkMLLib(EvaluatedModel):
     A class for generating the evaluated spark model object.
     """
 
-    def __init__(self, model_uri, problem_type, spark_feature_col_name, spark_session):
+    def __init__(self, model_uri, model_type, problem_type, spark_feature_col_name, spark_session):
         """
         Initializing the evaluation metric needed values.
         :param model_uri: the model uri.
+        :param model_type: the model type (flavor).
         :param problem_type: the problem type (regression or classification).
         :param spark_feature_col_name: the spark features column name (used in spark models only).
         :param spark_session: the spark session (used in spark models only).
         """
-        super().__init__(model_uri, problem_type)
+        super().__init__(model_uri, model_type, problem_type)
         self.spark_feature_col_name = spark_feature_col_name
         self.spark_session = spark_session
 

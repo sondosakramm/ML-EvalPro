@@ -33,6 +33,6 @@ class EvaluatedModelFactory:
         print(f"Constructing the model {model_type} ...")
         if model_type in _factory_supported_classes:
             subclass = _factory_supported_classes.get(model_type)
-            return subclass(model_uri, *args, **kwargs)
+            return subclass(model_uri, model_type, *args, **kwargs)
         else:
             return EvaluatedModel(model_uri, *args, **kwargs)
