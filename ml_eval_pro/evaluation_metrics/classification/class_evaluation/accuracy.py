@@ -7,9 +7,10 @@ class Accuracy(ClassClassification):
     """
     A class for evaluating the model using Accuracy evaluation metric.
     """
+
     def measure(self):
         """
         Measure the accuracy of the model.
         :return: the accuracy score of the model.
         """
-        return accuracy_score(self.target, self.prediction)
+        return accuracy_score(self.target, self.prediction) * 100

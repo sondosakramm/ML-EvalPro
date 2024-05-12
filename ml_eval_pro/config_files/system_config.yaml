@@ -9,18 +9,26 @@ cpu:
 
 variance:
   step_size: 0.5
-  threshold: 0.2
+  threshold: 0.15
 
 thresholds:
   shap_significance: 0.05
   ece_threshold: 0.5
-  bias_threshold: 0.05
+  bias_threshold: 0.15
 
 adversarial_attack:
   learning_rate: 1e-1
-  max_iter: 20
+  max_iter: 100
   nb_parallel: 1
   threshold: 0.05
+  initial_const: 1e-1
+  binary_search_steps: 1
+  confidence: 0.0
+  targeted: False
+  abort_early: True
+  use_resize: False
+  use_importance: False
+  variable_h: 0.1
   #  min_num_bins: 5
   #  min_number_instances: 100
   #  num_bins_percentage: 0.1

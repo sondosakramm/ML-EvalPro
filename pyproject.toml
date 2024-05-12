@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "auto_evaluator"
-version = "0.0.4"
+version = "0.0.5.3"
 authors = [
     { name="Reem Ayman", email="reemayman5299@gmail.com" },
     { name="Sondos Akram", email="sondosakramm@gmail.com" },
