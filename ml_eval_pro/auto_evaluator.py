@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from ml_eval_pro.adverserial_test_cases.adversarial_attack_substitute import AdversarialAttackSubstitute
-from ml_eval_pro.bias.model_bias import ModelBias
+from ml_eval_pro.model_fairness.model_fairness_factory import ModelFairnessFactory
 from ml_eval_pro.carbon.carbon_emission.carbon import Carbon
 from ml_eval_pro.carbon.carbon_emission.carbon_calculator import CarbonCalculator
 from ml_eval_pro.carbon.inference_time.inference_time import InferenceTime
@@ -14,6 +14,7 @@ from ml_eval_pro.gdpr.gdpr_rules.model_transparency import ModelTransparency
 from ml_eval_pro.model.evaluated_model_factory import EvaluatedModelFactory
 from ml_eval_pro.summary.modules_summary.bias_summary import BiasSummary
 from ml_eval_pro.summary.modules_summary.carbon_summary import CarbonSummary
+from ml_eval_pro.summary.modules_summary.equalized_odds_summary import EqualizedOddsSummary
 from ml_eval_pro.summary.modules_summary.inference_summary import InferenceSummary
 from ml_eval_pro.summary.modules_summary.model_ethical_summary import ModelEthicalSummary
 from ml_eval_pro.summary.modules_summary.model_reliability_summary import ModelReliabilitySummary
@@ -75,6 +76,11 @@ class AutoEvaluator:
         self.features_description = features_description
         self.dataset_context = dataset_context
 
+        # TODO: to be removed after proper code refactoring
+        self.unethical_features = None
+        self.adversarial_attack_model = None
+        self.adversarial_testcases = None
+
     def _get_evaluation_metrics(self, target, predictions, predictions_prob):
         """
         Calculating the evaluation metrics.
@@ -86,7 +92,7 @@ class AutoEvaluator:
         print("Evaluating the model using the input evaluation metrics ...")
         res = {}
         for metric in self.evaluation_metrics:
-            if metric == 'expected calibration error' or metric == 'auc':
+            if metric == 'Expected Calibration Error' or metric == 'AUC':
                 res[metric] = EvaluatorsFactory.get_evaluator(metric, target,
                                                               predictions_prob,
                                                               num_of_classes=self.num_classes).measure()
@@ -138,13 +144,30 @@ class AutoEvaluator:
         Calculating the features bias in the model
         :return: a dictionary of the biased features and summary in the model.
         """
-        print("Evaluating the model bias ...")
-        model_bias = ModelBias(self.model_pipeline, self.model_type, self.test_dataset, self.test_target)
-        biased_features = model_bias()
+        print("Evaluating the model bias and fairness...")
+        eval_metric = "MAPE" if self.model_type == 'regression' else "Accuracy"
+
+        model_bias = ModelFairnessFactory.create("bias",
+                                                 model=self.model_pipeline,
+                                                 model_type=self.model_type,
+                                                 data=self.test_dataset,
+                                                 target=self.test_target,
+                                                 evaluation_metrics=[eval_metric])
+
+        biased_features = model_bias.get_model_fairness()
+
+        model_equalized_odds = ModelFairnessFactory.create("equalized odds",
+                                                           model=self.model_pipeline,
+                                                           model_type=self.model_type,
+                                                           data=self.test_dataset,
+                                                           target=self.test_target)
+
+        equalized_odds_features_vals = model_equalized_odds.get_model_fairness()
 
         return {
-            "biased_features": [] if len(biased_features) == 0 else np.array(biased_features)[:, 0],
-            "bias_summary": BiasSummary(model_bias).get_summary()
+            "biased_features": list(biased_features.keys()),
+            "bias_summary": BiasSummary(biased_features).get_summary(),
+            "equalized_odds": EqualizedOddsSummary(equalized_odds_features_vals).get_summary()
         }
 
     def _get_model_variance(self):
@@ -177,6 +200,9 @@ class AutoEvaluator:
                                            self.features_description, self.dataset_context)
         feature_importance, unethical_features = ethical_analysis()
 
+        # TODO: to be removed after proper code refactoring
+        self.unethical_features = unethical_features
+
         return {
             'feature_importance': feature_importance,
             'feature_ethnicity': unethical_features
@@ -206,6 +232,10 @@ class AutoEvaluator:
         adversarial_examples_generated_df = pd.DataFrame(adversarial_examples_generated,
                                                          columns=dataset_columns)
 
+        # TODO: to be removed after proper code refactoring
+        self.adversarial_testcases = adversarial_examples_generated_df
+        self.adversarial_attack_model = adversarial_attack
+
         adversarial_examples_predictions = self.model_pipeline.predict(adversarial_examples_generated_df)
 
         adv_test_cases, true_value, predicted_value = adversarial_attack.get_adversarial_test_cases(
@@ -233,7 +263,8 @@ class AutoEvaluator:
 
         model_ethical = ModelEthical(features_description=self.features_description,
                                      dataset_context=self.dataset_context,
-                                     X_test=self.test_dataset)
+                                     X_test=self.test_dataset,
+                                     unethical_features=self.unethical_features)
 
         model_reliability = ModelReliability(model=self.model_pipeline,
                                              X_test=self.test_dataset,
@@ -246,7 +277,9 @@ class AutoEvaluator:
                                            y_test=self.test_target,
                                            X_train=self.train_dataset,
                                            y_train=self.train_target,
-                                           problem_type=self.model_type)
+                                           problem_type=self.model_type,
+                                           adversarial_attack_model=self.adversarial_attack_model,
+                                           adversarial_testcases=self.adversarial_testcases)
 
         model_transparency = ModelTransparency(model=self.model_pipeline,
                                                X_test=self.test_dataset,
@@ -271,25 +304,25 @@ class AutoEvaluator:
         :return: a dictionary of all the evaluation values in auto evaluator.
         """
         return {
-            'evaluation_metrics_test': self._get_evaluation_metrics(self.test_target, self.test_predictions,
-                                                                    self.test_predictions_prob),
-
-            'evaluation_metrics_train': {} if self.train_dataset is None
-            else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
-
-            'reliability_diagram': self._get_reliability_diagram(),
-
-            'environmental_impact': self._get_environmental_impact(),
-
+            # 'evaluation_metrics_test': self._get_evaluation_metrics(self.test_target, self.test_predictions,
+            #                                                         self.test_predictions_prob),
+            #
+            # 'evaluation_metrics_train': {} if self.train_dataset is None
+            # else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
+            # #
+            # 'reliability_diagram': self._get_reliability_diagram(),
+            #
+            # 'environmental_impact': self._get_environmental_impact(),
+            #
             'model_bias': self._get_model_bias(),
-
-            'model_variance': self._get_model_variance(),
-
-            'ethical_analysis': self._get_feature_importance(),
-
-            'adversarial_test_cases': self._get_adversarial_test_cases(),
-
-            'gdpr_compliance': self._get_model_gdpr_compliance(),
+            #
+            # 'model_variance': self._get_model_variance(),
+            #
+            # 'ethical_analysis': self._get_feature_importance(),
+            #
+            # 'adversarial_test_cases': self._get_adversarial_test_cases(),
+            #
+            # 'gdpr_compliance': self._get_model_gdpr_compliance(),
 
             # 'machine_unlearning': self.__get_machine_unlearning_ability()
 

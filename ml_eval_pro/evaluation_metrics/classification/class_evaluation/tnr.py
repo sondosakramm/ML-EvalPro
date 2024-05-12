@@ -13,4 +13,4 @@ class TNR(ClassClassification):
         Evaluating the model with TNR.
         :return: the TNR value.
         """
-        return recall_score(self.target, self.prediction, pos_label=0, average='micro')
+        return recall_score(self.target, self.prediction, pos_label=0, average='micro') * 100

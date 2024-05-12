@@ -13,4 +13,4 @@ class F1Score(ClassClassification):
         Evaluating the model with F1-score.
         :return: the F1-score value.
         """
-        return f1_score(self.target, self.prediction, average='micro')
+        return f1_score(self.target, self.prediction, average='micro') * 100

@@ -32,39 +32,39 @@ class EvaluatorsFactory:
         :return: An instance of the evaluation metric.
         """
         try:
-            if evaluation_metric == 'mae':
+            if evaluation_metric == 'MAE':
                 return MAE(target, prediction)
-            elif evaluation_metric == 'mape':
+            elif evaluation_metric == 'MAPE':
                 return MAPE(target, prediction)
-            elif evaluation_metric == 'mean bias deviation':
+            elif evaluation_metric == 'Mean Bias Deviation':
                 return MeanBiasDeviation(target, prediction)
-            elif evaluation_metric == 'median absolute error':
+            elif evaluation_metric == 'Median Absolute Error':
                 return MEDAE(target, prediction)
-            elif evaluation_metric == 'r square':
+            elif evaluation_metric == 'R-Squared':
                 return RSquare(target, prediction)
-            elif evaluation_metric == 'rmse':
+            elif evaluation_metric == 'RMSE':
                 return RMSE(target, prediction)
-            elif evaluation_metric == 'auc':
+            elif evaluation_metric == 'AUC':
                 return AUC(target, prediction, num_of_classes, n_bins)
-            elif evaluation_metric == 'expected calibration error':
+            elif evaluation_metric == 'Expected Calibration Error':
                 return ECEMetric(target, prediction, num_of_classes)
             elif evaluation_metric == 'classification reliability evaluation':
                 return ReliabilityDiagram(target, prediction, num_of_classes)
             elif evaluation_metric == 'regression reliability evaluation':
                 return Calibration(target, prediction, n_bins)
-            elif evaluation_metric == 'accuracy':
+            elif evaluation_metric == 'Accuracy':
                 return Accuracy(target, prediction, num_of_classes)
-            elif evaluation_metric == 'cross entropy loss':
+            elif evaluation_metric == 'Cross Entropy Loss':
                 return CrossEntropyLoss(target, prediction, num_of_classes)
-            elif evaluation_metric == 'f1 score':
+            elif evaluation_metric == 'F1 Score':
                 return F1Score(target, prediction, num_of_classes)
-            elif evaluation_metric == 'false negative rate':
+            elif evaluation_metric == 'False Negative Rate':
                 return FNR(target, prediction, num_of_classes)
-            elif evaluation_metric == 'false positive rate':
+            elif evaluation_metric == 'False Positive Rate':
                 return FPR(target, prediction, num_of_classes)
-            elif evaluation_metric == 'true negative rate':
+            elif evaluation_metric == 'True Negative Rate':
                 return TNR(target, prediction, num_of_classes)
-            elif evaluation_metric == 'true positive rate':
+            elif evaluation_metric == 'True Positive Rate':
                 return TPR(target, prediction, num_of_classes)
         except NotImplementedError:
             raise NotImplementedError(f'{evaluation_metric} not implemented.')

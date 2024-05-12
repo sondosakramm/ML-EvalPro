@@ -13,4 +13,4 @@ class FPR(ClassClassification):
         Evaluating the model with FPR.
         :return: the FPR value.
         """
-        return 1 - recall_score(self.target, self.prediction, pos_label=0, average='micro')
+        return (1 - recall_score(self.target, self.prediction, pos_label=0, average='micro')) * 100

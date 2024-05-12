@@ -13,4 +13,4 @@ class FNR(ClassClassification):
         Evaluating the model with FNR.
         :return: the FNR value.
         """
-        return 1 - recall_score(self.target, self.prediction, average='micro')
+        return (1 - recall_score(self.target, self.prediction, average='micro')) * 100

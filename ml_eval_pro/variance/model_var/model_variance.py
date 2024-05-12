@@ -95,8 +95,8 @@ class ModelVariance(ABC):
             - float: The evaluation metric error.
         """
         if self.problem_type == 'classification':
-            return EvaluatorsFactory.get_evaluator('accuracy', y,
+            return EvaluatorsFactory.get_evaluator('Accuracy', y,
                                                    predictions).measure()
         elif self.problem_type == 'regression':
-            return EvaluatorsFactory.get_evaluator('mae', y,
+            return EvaluatorsFactory.get_evaluator('MAE', y,
                                                    predictions).measure()
