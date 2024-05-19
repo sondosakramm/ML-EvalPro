@@ -1,9 +1,9 @@
 from typing import Tuple
 
-from ml_eval_pro.model_transparency.model_transparency import ModelTransparency
+from ml_eval_pro.transparency.transparency import Transparency
 
 
-class ModelTransparencyKeras(ModelTransparency):
+class TransparencyCatBoost(Transparency):
     def get_model_algorithm(self):
         pass
 

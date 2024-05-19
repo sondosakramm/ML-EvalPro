@@ -4,7 +4,7 @@ from typing import Tuple
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 
 
-class ModelTransparency(ABC):
+class Transparency(ABC):
     def __init__(self, model: EvaluatedModel):
         self.model = model
 

@@ -9,10 +9,10 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor, RadiusN
 from sklearn.svm import SVC, NuSVC, SVR, NuSVR
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, ExtraTreeClassifier, ExtraTreeRegressor
 
-from ml_eval_pro.model_transparency.model_transparency import ModelTransparency
+from ml_eval_pro.transparency.transparency import Transparency
 
 
-class ModelTransparencySKlearn(ModelTransparency):
+class TransparencySKlearn(Transparency):
     def get_model_algorithm(self):
         return self.model.__dict__["model"]
 
