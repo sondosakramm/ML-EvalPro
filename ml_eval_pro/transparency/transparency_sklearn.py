@@ -29,3 +29,17 @@ class TransparencySKlearn(Transparency):
                           StackingClassifier, StackingRegressor]
 
         return explainable_models, partially_explainable_models, complex_models
+
+    def get_model_score(self, model_algorithm, **kwargs):
+        explainable_models = kwargs["explainable_models"]
+        partially_explainable_models = kwargs["partially_explainable_models"]
+        complex_models = kwargs["complex_models"]
+
+        if any(isinstance(model_algorithm, model_type) for model_type in explainable_models):
+            return 25
+        elif any(isinstance(model_algorithm, model_type) for model_type in partially_explainable_models):
+            return 65
+        elif any(isinstance(model_algorithm, model_type) for model_type in complex_models):
+            return 110
+        else:
+            return -1

@@ -1,11 +1,13 @@
 import mlflow
 
+from ml_eval_pro.model.EvaluatedModelKeras import EvaluatedModelKeras
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.model.evaluated_model_catboost import EvaluatedModelCatBoost
 from ml_eval_pro.model.evaluated_model_h2o import EvaluatedModelH2O
 from ml_eval_pro.model.evaluated_model_onnx import EvaluatedModelONNX
 from ml_eval_pro.model.evaluated_model_sklearn import EvaluatedModelSKLearn
 from ml_eval_pro.model.evaluated_model_sparkmllib import EvaluatedModelSparkMLLib
+from ml_eval_pro.model.evaluated_model_tensorflow import EvaluatedModelTensorflow
 
 
 class EvaluatedModelFactory:
@@ -27,7 +29,9 @@ class EvaluatedModelFactory:
                                       "mlflow.h2o": EvaluatedModelH2O,
                                       "mlflow.spark": EvaluatedModelSparkMLLib,
                                       "mlflow.catboost": EvaluatedModelCatBoost,
-                                      "mlflow.onnx": EvaluatedModelONNX
+                                      "mlflow.onnx": EvaluatedModelONNX,
+                                      "mlflow.tensorflow": EvaluatedModelTensorflow,
+                                      "mlflow.keras": EvaluatedModelKeras
                                       }
 
         print(f"Constructing the model {model_type} ...")
@@ -35,4 +39,4 @@ class EvaluatedModelFactory:
             subclass = _factory_supported_classes.get(model_type)
             return subclass(model_uri, model_type, *args, **kwargs)
         else:
-            return EvaluatedModel(model_uri, *args, **kwargs)
+            return EvaluatedModel(model_uri, model_type, *args, **kwargs)

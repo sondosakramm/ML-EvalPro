@@ -11,11 +11,17 @@ class Transparency(ABC):
     def get_model_transparency(self) -> str:
         model_algorithm = self.get_model_algorithm()
         explainable_models, partially_explainable_models, complex_models = self.get_model_algorithms_complexity()
-        return self.__get_transparency_level(model_algorithm, explainable_models, partially_explainable_models,
-                                             complex_models)
+        model_complexity_score = self.get_model_score(model_algorithm,
+                                                      explainable_models=explainable_models,
+                                                      partially_explainable_models=partially_explainable_models,
+                                                      complex_models=complex_models)
+        return self.__get_transparency_level(model_complexity_score)
+
+    def get_model_algorithms_complexity(self) -> Tuple[list, list, list]:
+        return [], [], []
 
     @abstractmethod
-    def get_model_algorithms_complexity(self) -> Tuple[list, list, list]:
+    def get_model_score(self, model_algorithm, **kwargs):
         pass
 
     @abstractmethod
@@ -23,13 +29,12 @@ class Transparency(ABC):
         pass
 
     @classmethod
-    def __get_transparency_level(cls, model_algorithm, explainable_models,
-                                 partially_explainable_models, complex_models):
-        if any(isinstance(model_algorithm, model_type) for model_type in explainable_models):
+    def __get_transparency_level(cls, model_complexity_score):
+        if 0 <= model_complexity_score < 50:
             return "A"
-        elif any(isinstance(model_algorithm, model_type) for model_type in partially_explainable_models):
+        elif 50 <= model_complexity_score < 100:
             return "B"
-        elif any(isinstance(model_algorithm, model_type) for model_type in complex_models):
+        elif model_complexity_score >= 100:
             return "C"
-        else:
-            return "I"
+
+        return "I"

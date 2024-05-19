@@ -1,11 +1,30 @@
-from typing import Tuple
+import numpy as np
 
 from ml_eval_pro.transparency.transparency import Transparency
+import tensorflow as tf
 
 
 class TransparencyTensorflow(Transparency):
     def get_model_algorithm(self):
-        pass
+        return self.model.__dict__["model"]
 
-    def get_model_algorithms_complexity(self) -> Tuple[list, list, list]:
-        pass
+    def get_model_score(self, model_algorithm, **kwargs):
+        complexity_score = 0
+
+        num_layers = len(model_algorithm.layers)
+        complexity_score += num_layers * 10
+
+        total_params = model_algorithm.count_params()
+        complexity_score += np.log1p(total_params)
+
+        for layer in model_algorithm.layers:
+            if isinstance(layer, (tf.keras.layers.Conv2D, tf.keras.layers.Conv3D)):
+                complexity_score += 20
+            elif isinstance(layer, tf.keras.layers.LSTM):
+                complexity_score += 30
+            elif isinstance(layer, tf.keras.layers.Dense):
+                complexity_score += 5
+            elif isinstance(layer, (tf.keras.layers.BatchNormalization, tf.keras.layers.Dropout)):
+                complexity_score += 10
+
+        return complexity_score

@@ -5,7 +5,7 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 class TransparencyH2O(Transparency):
     def get_model_algorithm(self):
-        pass
+        return self.model.__dict__["model"]
 
-    def get_model_algorithms_complexity(self) -> Tuple[list, list, list]:
+    def get_model_score(self, model_algorithm, **kwargs):
         pass
