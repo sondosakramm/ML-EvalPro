@@ -14,7 +14,7 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 class TransparencySKlearn(Transparency):
     def get_model_algorithm(self):
-        return self.model.__dict__["model"]
+        return self.model.model
 
     def get_model_algorithms_complexity(self) -> Tuple[list, list, list]:
         explainable_models = [LinearRegression, LogisticRegression, Ridge, Lasso, ElasticNet, DecisionTreeClassifier,

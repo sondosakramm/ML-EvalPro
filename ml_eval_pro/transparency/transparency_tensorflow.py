@@ -6,7 +6,7 @@ import tensorflow as tf
 
 class TransparencyTensorflow(Transparency):
     def get_model_algorithm(self):
-        return self.model.model.__dict__["_model_impl"].keras_model
+        return self.model.model._model_impl.keras_model
 
     def get_model_score(self, model_algorithm, **kwargs):
         complexity_score = 0

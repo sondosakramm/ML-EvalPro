@@ -10,7 +10,7 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 class TransparencyH2O(Transparency):
     def get_model_algorithm(self):
-        return self.model.model.__dict__["_model_impl"].h2o_model
+        return self.model.model._model_impl.h2o_model
 
     def get_model_algorithms_complexity(self) -> Tuple[list, list, list]:
         explainable_models = [H2OGeneralizedLinearEstimator, H2ODecisionTreeEstimator,
