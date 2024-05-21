@@ -7,5 +7,5 @@ class TransparencyCatBoost(Transparency):
     def get_model_algorithm(self):
         pass
 
-    def get_model_algorithms_complexity(self) -> Tuple[list, list, list]:
+    def get_model_score(self, model_algorithm, **kwargs):
         pass

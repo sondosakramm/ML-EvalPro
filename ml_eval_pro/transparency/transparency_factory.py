@@ -3,7 +3,6 @@ from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.transparency.transparency import Transparency
 from ml_eval_pro.transparency.transparency_catboost import TransparencyCatBoost
 from ml_eval_pro.transparency.transparency_h2o import TransparencyH2O
-from ml_eval_pro.transparency.transparency_keras import TransparencyKeras
 from ml_eval_pro.transparency.transparency_lightgbm import TransparencyLightGBM
 from ml_eval_pro.transparency.transparency_onnx import TransparencyONNX
 from ml_eval_pro.transparency.transparency_pytorch import TransparencyPyTorch
@@ -28,7 +27,6 @@ class TransparencyFactory:
         """
         _factory_supported_classes = {"mlflow.catboost": TransparencyCatBoost,
                                       "mlflow.h2o": TransparencyH2O,
-                                      "mlflow.keras": TransparencyKeras,
                                       "mlflow.lightgbm": TransparencyLightGBM,
                                       "mlflow.onnx": TransparencyONNX,
                                       "mlflow.pytorch": TransparencyPyTorch,
@@ -41,6 +39,6 @@ class TransparencyFactory:
 
         if model.model_type in _factory_supported_classes:
             subclass = _factory_supported_classes.get(model.model_type)
-            return subclass(model, *args, **kwargs)
+            return subclass(model)
         else:
             raise NotImplementedError(f"The model type {model.model_type} is not supported!")

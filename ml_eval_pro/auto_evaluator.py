@@ -261,35 +261,36 @@ class AutoEvaluator:
         """
         print("Evaluating the model GDPR Compliance ...")
 
-        model_ethical = ModelEthical(features_description=self.features_description,
-                                     dataset_context=self.dataset_context,
-                                     X_test=self.test_dataset,
-                                     unethical_features=self.unethical_features)
-
-        model_reliability = ModelReliability(model=self.model_pipeline,
-                                             X_test=self.test_dataset,
-                                             y_test=self.test_target,
-                                             problem_type=self.model_type,
-                                             num_of_classes=self.num_classes)
-
-        model_robustness = ModelRobustness(model=self.model_pipeline,
-                                           X_test=self.test_dataset,
-                                           y_test=self.test_target,
-                                           X_train=self.train_dataset,
-                                           y_train=self.train_target,
-                                           problem_type=self.model_type,
-                                           adversarial_attack_model=self.adversarial_attack_model,
-                                           adversarial_testcases=self.adversarial_testcases)
+        # model_ethical = ModelEthical(features_description=self.features_description,
+        #                              dataset_context=self.dataset_context,
+        #                              X_test=self.test_dataset,
+        #                              unethical_features=self.unethical_features)
+        #
+        # model_reliability = ModelReliability(model=self.model_pipeline,
+        #                                      X_test=self.test_dataset,
+        #                                      y_test=self.test_target,
+        #                                      problem_type=self.model_type,
+        #                                      num_of_classes=self.num_classes)
+        #
+        # model_robustness = ModelRobustness(model=self.model_pipeline,
+        #                                    X_test=self.test_dataset,
+        #                                    y_test=self.test_target,
+        #                                    X_train=self.train_dataset,
+        #                                    y_train=self.train_target,
+        #                                    problem_type=self.model_type,
+        #                                    adversarial_attack_model=self.adversarial_attack_model,
+        #                                    adversarial_testcases=self.adversarial_testcases)
 
         model_transparency = ModelTransparency(model=self.model_pipeline,
                                                X_test=self.test_dataset,
                                                y_test=self.test_target,
                                                problem_type=self.model_type)
 
-        return (ModelReliabilitySummary(model_reliability).get_summary() +
-                '\n' + ModelEthicalSummary(model_ethical).get_summary() +
-                '\n' + ModelRobustnessSummary(model_robustness).get_summary() +
-                '\n' + ModelTransparencySummary(model_transparency).get_summary())
+        # return (ModelReliabilitySummary(model_reliability).get_summary() +
+        #         '\n' + ModelEthicalSummary(model_ethical).get_summary() +
+        #         '\n' + ModelRobustnessSummary(model_robustness).get_summary() +
+        #         '\n' +4
+        return ModelTransparencySummary(model_transparency).get_summary()
 
     def _get_machine_unlearning_ability(self):
         """
@@ -304,23 +305,23 @@ class AutoEvaluator:
         :return: a dictionary of all the evaluation values in auto evaluator.
         """
         return {
-            'evaluation_metrics_test': self._get_evaluation_metrics(self.test_target, self.test_predictions,
-                                                                    self.test_predictions_prob),
+            # 'evaluation_metrics_test': self._get_evaluation_metrics(self.test_target, self.test_predictions,
+            #                                                         self.test_predictions_prob),
 
-            'evaluation_metrics_train': {} if self.train_dataset is None
-            else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
+            # 'evaluation_metrics_train': {} if self.train_dataset is None
+            # else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
+            # #
+            # 'reliability_diagram': self._get_reliability_diagram(),
             #
-            'reliability_diagram': self._get_reliability_diagram(),
-
-            'environmental_impact': self._get_environmental_impact(),
-
-            'model_bias': self._get_model_bias(),
-
-            'model_variance': self._get_model_variance(),
-
-            'ethical_analysis': self._get_feature_importance(),
-
-            'adversarial_test_cases': self._get_adversarial_test_cases(),
+            # 'environmental_impact': self._get_environmental_impact(),
+            #
+            # 'model_bias': self._get_model_bias(),
+            #
+            # 'model_variance': self._get_model_variance(),
+            #
+            # 'ethical_analysis': self._get_feature_importance(),
+            #
+            # 'adversarial_test_cases': self._get_adversarial_test_cases(),
 
             'gdpr_compliance': self._get_model_gdpr_compliance(),
 

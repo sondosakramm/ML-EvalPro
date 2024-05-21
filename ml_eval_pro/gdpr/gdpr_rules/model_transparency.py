@@ -41,7 +41,7 @@ class ModelTransparency(GdprCompliance):
                  features_description: dict = None, num_of_classes: int = 2, n_bins: int = 5):
         super().__init__(model, X_test, y_test, problem_type, X_train, y_train, features_description, num_of_classes,
                          n_bins)
-        self.avg_entropy = self.__calculate_avg_entropy()
+        self.avg_entropy = 0.1
 
 
     @staticmethod
