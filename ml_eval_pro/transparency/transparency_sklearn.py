@@ -13,6 +13,10 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 
 class TransparencySKlearn(Transparency):
+    """
+    A class for generating transparency for sklearn models.
+    """
+
     def get_model_algorithm(self):
         return self.model.model
 

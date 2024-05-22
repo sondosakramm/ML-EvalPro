@@ -2,6 +2,10 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 
 class TransparencyXGBoost(Transparency):
+    """
+    A class for generating transparency for xgboost models.
+    """
+
     def get_model_algorithm(self):
         pass
 

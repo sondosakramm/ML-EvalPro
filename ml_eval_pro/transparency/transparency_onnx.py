@@ -6,6 +6,11 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 
 class TransparencyONNX(Transparency):
+    """
+    A class for generating transparency for onnx models.
+    """
+
+
     def get_model_algorithm(self):
         op_types = [node.op_type for node in onnx.load(self.model.model._model_impl.rt._model_path).graph.node]
         if len(op_types) == 1:

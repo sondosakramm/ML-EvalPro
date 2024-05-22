@@ -5,6 +5,10 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 
 class TransparencyKeras(Transparency):
+    """
+    A class for generating transparency for keras models.
+    """
+
     def get_model_algorithm(self):
         return self.model.model._model_impl.keras_model
 

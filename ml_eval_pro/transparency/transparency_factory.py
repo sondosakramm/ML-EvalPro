@@ -21,7 +21,7 @@ class TransparencyFactory:
     @classmethod
     def create(cls, model: EvaluatedModel, *args, **kwargs) -> Transparency:
         """
-        Create a model based on the model type.
+         Create a model based on the model type.
         :param model: the model object.
         :return: the created model class according to its type.
         """

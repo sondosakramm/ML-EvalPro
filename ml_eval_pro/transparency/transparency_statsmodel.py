@@ -3,6 +3,10 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 
 class ModelTransparencyStats(Transparency):
+    """
+    A class for generating transparency for stats models.
+    """
+
 
     def get_model_algorithm(self):
         model_class = type(self.model.model.model).__name__

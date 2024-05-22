@@ -5,6 +5,10 @@ import tensorflow as tf
 
 
 class TransparencyTensorflow(Transparency):
+    """
+    A class for generating transparency for tensorflow models.
+    """
+
     def get_model_algorithm(self):
         return self.model.model._model_impl.keras_model
 

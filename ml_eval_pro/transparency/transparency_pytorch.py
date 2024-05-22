@@ -5,6 +5,10 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 
 class TransparencyPyTorch(Transparency):
+    """
+    A class for generating transparency for pytorch models.
+    """
+
     def get_model_algorithm(self):
         return self.model.model._model_impl.pytorch_model
 
