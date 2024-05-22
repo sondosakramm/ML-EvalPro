@@ -1,5 +1,4 @@
-from typing import Tuple
-
+from typing import Tuple, List
 from ml_eval_pro.transparency.transparency import Transparency
 
 
@@ -7,5 +6,6 @@ class TransparencyCatBoost(Transparency):
     def get_model_algorithm(self):
         pass
 
+
     def get_model_score(self, model_algorithm, **kwargs):
-        pass
+        return 110

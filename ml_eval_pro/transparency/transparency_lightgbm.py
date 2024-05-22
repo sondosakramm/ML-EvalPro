@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 
 from ml_eval_pro.transparency.transparency import Transparency
 
@@ -8,4 +8,4 @@ class TransparencyLightGBM(Transparency):
         pass
 
     def get_model_score(self, model_algorithm, **kwargs):
-        pass
+        return 110

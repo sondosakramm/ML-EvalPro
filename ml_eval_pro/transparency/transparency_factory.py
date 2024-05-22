@@ -32,7 +32,7 @@ class TransparencyFactory:
                                       "mlflow.pytorch": TransparencyPyTorch,
                                       "mlflow.sklearn": TransparencySKlearn,
                                       "mlflow.spark": TransparencySparkML,
-                                      "mlflow.statsmodel": ModelTransparencyStats,
+                                      "mlflow.statsmodels": ModelTransparencyStats,
                                       "mlflow.tensorflow": TransparencyTensorflow,
                                       "mlflow.xgboost": TransparencyXGBoost
                                       }
