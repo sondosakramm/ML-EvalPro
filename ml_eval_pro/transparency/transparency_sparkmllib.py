@@ -13,6 +13,11 @@ from ml_eval_pro.transparency.transparency import Transparency
 
 
 class TransparencySparkML(Transparency):
+    """
+    A class for generating transparency for sparkml models.
+    """
+
+
     def get_model_algorithm(self):
         return self.model.model.stages[0]
 
