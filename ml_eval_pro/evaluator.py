@@ -304,26 +304,26 @@ class Evaluator:
         :return: a dictionary of all the evaluation values in auto evaluator.
         """
         return {
-            'evaluation_metrics_test': self._get_evaluation_metrics(self.test_target, self.test_predictions,
-                                                                    self.test_predictions_prob),
-
-            'evaluation_metrics_train': {} if self.train_dataset is None
-            else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
-            
-            'reliability_diagram': self._get_reliability_diagram(),
-
-            'environmental_impact': self._get_environmental_impact(),
-
+            # 'evaluation_metrics_test': self._get_evaluation_metrics(self.test_target, self.test_predictions,
+            #                                                         self.test_predictions_prob),
+            #
+            # 'evaluation_metrics_train': {} if self.train_dataset is None
+            # else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
+            # #
+            # 'reliability_diagram': self._get_reliability_diagram(),
+            #
+            # 'environmental_impact': self._get_environmental_impact(),
+            #
             'model_bias': self._get_model_bias(),
+            #
+            # 'model_variance': self._get_model_variance(),
+            #
+            # 'ethical_analysis': self._get_feature_importance(),
+            #
+            # 'adversarial_test_cases': self._get_adversarial_test_cases(),
+            #
+            # 'gdpr_compliance': self._get_model_gdpr_compliance(),
 
-            'model_variance': self._get_model_variance(),
-
-            'ethical_analysis': self._get_feature_importance(),
-
-            'adversarial_test_cases': self._get_adversarial_test_cases(),
-
-            'gdpr_compliance': self._get_model_gdpr_compliance(),
-
-            'machine_unlearning': self.__get_machine_unlearning_ability()
+            # 'machine_unlearning': self.__get_machine_unlearning_ability()
 
         }
