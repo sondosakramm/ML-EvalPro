@@ -27,7 +27,7 @@ from ml_eval_pro.variance.model_variance_by_test_data import ModelVarianceByTest
 from ml_eval_pro.variance.model_variance_by_train_test_data import ModelVarianceByTrainTestData
 
 
-class AutoEvaluator:
+class Evaluator:
 
     def __init__(self, model_uri, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
                  evaluation_metrics: list, features_description: dict, dataset_context: str,
@@ -309,7 +309,7 @@ class AutoEvaluator:
 
             'evaluation_metrics_train': {} if self.train_dataset is None
             else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
-
+            
             'reliability_diagram': self._get_reliability_diagram(),
 
             'environmental_impact': self._get_environmental_impact(),
@@ -324,6 +324,6 @@ class AutoEvaluator:
 
             'gdpr_compliance': self._get_model_gdpr_compliance(),
 
-            # 'machine_unlearning': self.__get_machine_unlearning_ability()
+            'machine_unlearning': self.__get_machine_unlearning_ability()
 
         }
