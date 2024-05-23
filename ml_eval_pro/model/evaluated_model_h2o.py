@@ -15,7 +15,6 @@ class EvaluatedModelH2O(EvaluatedModel):
         :param data: the data to be predicted.
         :param predict_class: indicating whether the prediction is a class prediction (in case of classification only).
         """
-        print(f"Prediction class: {predict_class}")
         predictions = convert_dataframe_to_numpy(self.model.predict(data))
 
         if self.problem_type == "classification":

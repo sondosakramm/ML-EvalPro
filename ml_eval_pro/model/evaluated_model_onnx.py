@@ -1,4 +1,5 @@
 import numpy as np
+import mlflow
 
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.utils.validation import convert_dataframe_to_numpy
