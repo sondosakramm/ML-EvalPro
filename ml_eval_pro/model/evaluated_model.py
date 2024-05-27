@@ -10,14 +10,16 @@ class EvaluatedModel:
     """
     A class for generating the evaluated model object.
     """
-    def __init__(self, model_uri, problem_type):
+    def __init__(self, model_uri, model_type, problem_type):
         """
         Initializing the evaluation metric needed values.
         :param model_uri: the model uri.
+        :param model_type: the model type (flavor).
         :param problem_type: the problem type (regression or classification).
         """
         self.model_uri = model_uri
         self.model = self.load()
+        self.model_type = model_type
         self.problem_type = problem_type
 
     def load(self):

@@ -27,7 +27,7 @@ from ml_eval_pro.variance.model_variance_by_test_data import ModelVarianceByTest
 from ml_eval_pro.variance.model_variance_by_train_test_data import ModelVarianceByTrainTestData
 
 
-class AutoEvaluator:
+class Evaluator:
 
     def __init__(self, model_uri, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
                  evaluation_metrics: list, features_description: dict, dataset_context: str,

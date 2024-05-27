@@ -14,6 +14,7 @@ from xgboost import XGBRegressor
 
 from ml_eval_pro.configuration_manager.configuration_reader.yaml_reader import YamlReader
 from ml_eval_pro.gdpr.gdpr_compliance import GdprCompliance
+from ml_eval_pro.transparency.transparency_factory import TransparencyFactory
 
 
 class ModelTransparency(GdprCompliance):
@@ -40,7 +41,7 @@ class ModelTransparency(GdprCompliance):
                  features_description: dict = None, num_of_classes: int = 2, n_bins: int = 5):
         super().__init__(model, X_test, y_test, problem_type, X_train, y_train, features_description, num_of_classes,
                          n_bins)
-        self.avg_entropy = self.__calculate_avg_entropy()
+        self.avg_entropy = 0.1
 
 
     @staticmethod
@@ -70,27 +71,6 @@ class ModelTransparency(GdprCompliance):
 
     def check_explain_ability(self):
         """Check the explain-ability of the model based on its type."""
-
-        model_algorithm = self.model.__dict__["model"]
-
-        explainable_models = [LinearRegression, LogisticRegression, Ridge, Lasso, ElasticNet, DecisionTreeClassifier,
-                              DecisionTreeRegressor, ExtraTreeClassifier, ExtraTreeRegressor]
-
-        partially_explainable_models = [KNeighborsClassifier, KNeighborsRegressor,
-                                        RadiusNeighborsClassifier, RadiusNeighborsRegressor, SVC, NuSVC,
-                                        SVR, NuSVR, ]
-
-        complex_models = [RandomForestClassifier, RandomForestRegressor, BaggingClassifier, BaggingRegressor,
-                          AdaBoostClassifier, AdaBoostRegressor, GradientBoostingClassifier, GradientBoostingRegressor,
-                          XGBRegressor,
-                          StackingClassifier, StackingRegressor]
-
-        if any(isinstance(model_algorithm, model_type) for model_type in explainable_models):
-            return "A"
-        elif any(isinstance(model_algorithm, model_type) for model_type in partially_explainable_models):
-            return "B"
-        elif any(isinstance(model_algorithm, model_type) for model_type in complex_models):
-            return "C"
-        else:
-            return "I"
+        model_transparency = TransparencyFactory.create(self.model)
+        return model_transparency.get_model_transparency()
 
