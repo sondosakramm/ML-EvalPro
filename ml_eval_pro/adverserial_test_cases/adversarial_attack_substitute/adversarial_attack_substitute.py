@@ -59,6 +59,9 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         self.__is_robust = None
 
     def get_adversarial_testcases(self):
+        """
+        Get the adversarial test cases of a model.
+        """
         substitute_model = AdversarialAttackSubstituteModelFactory.create(self.model_type,
                                                                           self.train_input_features,
                                                                           self.train_model_predictions)
@@ -67,6 +70,9 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         return self.__generate_adversarial_testcases(generated_testcases)
 
     def __generate_adversarial_testcases(self, generated_testcases):
+        """
+        Extract the adversarial test cases from the generated test cases of an attack.
+        """
         adversarial_predictions = self.model.predict(generated_testcases)
         threshold = 0 if self.model_type == "classification" else np.std(self.test_model_predictions.unique())
 
@@ -94,6 +100,10 @@ class AdversarialAttackSubstitute(AdversarialAttack):
 
     @abstractmethod
     def generate_attack_object(self, substitute_model):
+        """
+        Generate the adversarial attack object given the substitute model.
+        :param substitute_model: the generated substitute model given the data of the original model.
+        """
         pass
 
     @property

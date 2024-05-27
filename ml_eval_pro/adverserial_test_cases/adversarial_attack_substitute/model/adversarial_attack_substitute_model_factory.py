@@ -13,7 +13,7 @@ class AdversarialAttackSubstituteModelFactory:
     @classmethod
     def create(cls, model_type: str, *args, **kwargs) -> AdversarialAttackSubstituteModel:
         """
-        Create an adversarial attack substitute model based on the attack type.
+        Create an adversarial attack substitute model based on the problem type.
         :param model_type: the model type (regression or classification).
         :return: the created adversarial attack substitute model class according to its type.
         """

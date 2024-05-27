@@ -8,6 +8,9 @@ from ml_eval_pro.adverserial_test_cases.adversarial_attack_substitute.model.adve
 class AdversarialAttackSubstituteRegression(AdversarialAttackSubstituteModel):
 
     def generate_predictions(self):
+        """
+        Generate the predictions used for training the substitute model.
+        """
         num_bins = calculate_optimal_bins(self.train_model_predictions)
         binning_ranges = np.linspace(min(self.train_model_predictions), max(self.train_model_predictions) + 1,
                                      num_bins + 1)

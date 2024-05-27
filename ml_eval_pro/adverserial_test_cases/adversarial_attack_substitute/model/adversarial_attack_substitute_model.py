@@ -7,18 +7,32 @@ from sklearn.pipeline import make_pipeline
 
 
 class AdversarialAttackSubstituteModel(ABC):
+    """
+    An abstract class for generating a substitute model according to the problem type.
+    """
 
     def __init__(self, train_input_features, train_model_predictions):
+        """
+        Generate the substitute model object
+        :param train_input_features: the input features used for training the model.
+        :param train_model_predictions: the model prediction of the given input features.
+        """
         self.train_input_features = train_input_features
         self.train_model_predictions = train_model_predictions
 
     def generate_model(self):
+        """
+        Generate the substitute model.
+        """
         predictions = self.generate_predictions()
         substitute_model = self.__generate_substitute_model(predictions)
         return SklearnClassifier(substitute_model)
 
     @abstractmethod
     def generate_predictions(self):
+        """
+        Generate the predictions used for training the substitute model.
+        """
         pass
 
     def __generate_substitute_model(self, predictions):
