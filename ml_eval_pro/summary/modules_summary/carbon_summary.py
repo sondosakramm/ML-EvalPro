@@ -9,7 +9,7 @@ class CarbonSummary(SummaryGenerator):
 
     def get_summary(self):
         return (f'Current platform is deployed on virtual machine with cpu {self.carbon.cpu_name}, '
-                f'it\'s speed is {self.carbon.cpu_speed} and '
+                f'it\'s speed is {self.carbon.cpu_speed}GHZ and '
                 f'power consumptions is {self.carbon.cpu_value} Kw,'
                 f', assuming that the energy generator is {self.carbon.energy_generator}, '
                 f'and it\'s power consumption is {self.carbon.energy_generator_value} KgCO2 so it will generate'

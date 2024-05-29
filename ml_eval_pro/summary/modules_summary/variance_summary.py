@@ -18,7 +18,7 @@ class VarianceSummary(SummaryGenerator):
             if len(features_exceed_threshold) > 0:
                 summary += f'High predictions variance is detected when doing small perturbations on features \n'
                 i = 0
-                for column in self.variance.X_test_with_features_name.columns:
+                for column in self.variance.test_dataset_with_features_name.columns:
                     if i in features_exceed_threshold:
                         summary += f'{column}, '
                     i += 1
@@ -30,12 +30,12 @@ class VarianceSummary(SummaryGenerator):
             summary += (f"First evaluation for the model's performance on both the data it was trained on (X_train) and"
                         f" the unseen data (X_test). By comparing the model's predictions on these two sets, "
                         f"the difference in performance is calculate.\n")
-            if self.variance.calculate_variance() > self.variance.yaml_reader.get('variance')['threshold']:
+            if self.variance.calculate_variance() > self.variance.threshold:
                 summary += (f"Since this difference exceeds the threshold = "
-                            f"{self.variance.yaml_reader.get('variance')['threshold']}, "
+                            f"{self.variance.threshold}, "
                             f"it indicates that the model is not generalizing well and has high variance.")
             else:
                 summary += (f"Since this difference does not exceeds the threshold = "
-                            f"{self.variance.yaml_reader.get('variance')['threshold']}, "
+                            f"{self.variance.threshold}, "
                             f"it indicates that the model is generalizing well and no high variance is detected.")
         return summary

@@ -1,7 +1,4 @@
-import os.path
-
 from ml_eval_pro.carbon.inference_time.inference_time import InferenceTime
-from ml_eval_pro.configuration_manager.configuration_reader.yaml_reader import YamlReader
 
 
 class Carbon:
@@ -10,23 +7,26 @@ class Carbon:
 
     """
 
-    def __init__(self, model, data):
+    def __init__(self, model, data, cpu_name: str = 'Xeon', cpu_speed: float = 2.2, cpu_value: float = 0.061,
+                 energy_name: str = 'Fuel', energy_value: float = 0.865):
         """
         Initialize a Carbon instance.
 
         Parameters:
         - model: model that it's inference time will be calculated.
         - data: (train/test) data that model will use to generate predictions.
-
+        - cpu_name (str): The name of the CPU being used.
+        - cpu_speed (float): The speed of the CPU in GHz.
+        - cpu_value (float): The value or performance index of the CPU.
+        - energy_name (str): The name or type of energy resource being used.
+        - energy_value (float): The value or consumption rate of the energy resource.
         """
-        self.__yaml_reader = YamlReader(os.path.join(os.path.curdir, "ml_eval_pro",
-                                                     "config_files", "system_config.yaml"))
         self._inference_time = InferenceTime(model, data).calc_inference_time_hours()
-        self._cpu_name = self.__yaml_reader.get('cpu')['name']
-        self._cpu_speed = self.__yaml_reader.get('cpu')['speed']
-        self._cpu_value = self.__yaml_reader.get('cpu')['value']
-        self._energy_generator = self.__yaml_reader.get('energy_generator')['name']
-        self._energy_generator_value = self.__yaml_reader.get('energy_generator')['value']
+        self._cpu_name = cpu_name
+        self._cpu_speed = cpu_speed
+        self._cpu_value = cpu_value
+        self._energy_generator = energy_name
+        self._energy_generator_value = energy_value
 
     @property
     def cpu_name(self):

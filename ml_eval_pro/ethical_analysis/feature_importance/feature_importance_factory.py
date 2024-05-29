@@ -1,6 +1,7 @@
 from ml_eval_pro.ethical_analysis.feature_importance.feature_importance import FeatureImportance
 from ml_eval_pro.ethical_analysis.feature_importance.shap import SHAP
 
+
 class FeatureImportanceFactory:
     """
     A class for generating a feature importance object.
@@ -17,6 +18,6 @@ class FeatureImportanceFactory:
 
         if feature_importance_type in _factory_supported_classes:
             subclass = _factory_supported_classes.get(feature_importance_type)
-            return subclass(*args ,**kwargs)
+            return subclass(*args, **kwargs)
         else:
             raise Exception(f'Cannot find "{feature_importance_type}"')

@@ -1,10 +1,8 @@
-import os
 from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
 
-from ml_eval_pro.configuration_manager.configuration_reader.yaml_reader import YamlReader
 from ml_eval_pro.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 
 
@@ -28,10 +26,6 @@ class FeatureFairness(ABC):
         self.features = features
         self.feature_name = feature_name
         self.evaluation_metric = evaluation_metric
-        # self.significance = YamlReader(os.path.join(os.path.curdir,
-        #                                             "ml_eval_pro",
-        #                                             "config_files",
-        #                                             "system_config.yaml")).get('thresholds')['bias_threshold']
 
     def measure_fairness(self) -> float:
         categorical_features = self.get_categorical_features()
