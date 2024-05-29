@@ -341,6 +341,7 @@ class Evaluator:
 
             'evaluation_metrics_train': {} if self.train_dataset is None
             else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
+
             'reliability_diagram': self._get_reliability_diagram(),
 
             'environmental_impact': self._get_environmental_impact(),
