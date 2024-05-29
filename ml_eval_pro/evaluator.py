@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from ml_eval_pro.adverserial_test_cases.adversarial_attack_substitute import AdversarialAttackSubstitute
+from ml_eval_pro.adverserial_test_cases.adversarial_attack_factory import AdversarialAttackFactory
+from ml_eval_pro.model_fairness.model_fairness_factory import ModelFairnessFactory
 from ml_eval_pro.carbon.carbon_emission.carbon import Carbon
 from ml_eval_pro.carbon.carbon_emission.carbon_calculator import CarbonCalculator
 from ml_eval_pro.carbon.inference_time.inference_time import InferenceTime
@@ -267,44 +268,22 @@ class Evaluator:
          the expected output, and the model output.
         """
         print("Generating the model adversarial test cases ...")
-        adversarial_attack = (
-            AdversarialAttackSubstitute(self.model_pipeline, self.model_type,
-                                        self.test_dataset, self.test_target,
-                                        num_classes=self.num_classes) if self.train_target is None else
-
-            AdversarialAttackSubstitute(self.model_pipeline, self.model_type,
-                                        self.test_dataset, self.test_target,
-                                        train_input_features=self.train_dataset,
-                                        train_target_features=self.train_target,
-                                        num_classes=self.num_classes))
-
-        adversarial_examples_generated = adversarial_attack.generate()
         dataset_columns = list(self.test_dataset.columns)
 
-        adversarial_examples_generated_df = pd.DataFrame(adversarial_examples_generated,
-                                                         columns=dataset_columns)
+        self.adversarial_attack_model = (
+            AdversarialAttackFactory.create("substitute_hopskipjump", self.model_pipeline, self.model_type,
+                                            self.test_dataset, self.test_target, dataset_columns,
+                                            num_classes=self.num_classes) if self.train_target is None else
 
-        # TODO: to be removed after proper code refactoring
-        self.adversarial_testcases = adversarial_examples_generated_df
-        self.adversarial_attack_model = adversarial_attack
+            AdversarialAttackFactory.create("substitute_hopskipjump", self.model_pipeline, self.model_type,
+                                            self.test_dataset, self.test_target, dataset_columns,
+                                            train_input_features=self.train_dataset,
+                                            train_target_features=self.train_target,
+                                            num_classes=self.num_classes))
 
-        adversarial_examples_predictions = self.model_pipeline.predict(adversarial_examples_generated_df)
+        adversarial_testcases = self.adversarial_attack_model.get_adversarial_testcases()
 
-        adv_test_cases, true_value, predicted_value = adversarial_attack.get_adversarial_test_cases(
-            adversarial_examples_generated,
-            adversarial_examples_predictions)
-
-        dataset_columns.extend(["Expected Output", "Model Output"])
-
-        # if the model is robust, return an empty dataframe
-        if true_value.size == 0:
-            return pd.DataFrame(columns=dataset_columns)
-
-        true_value = true_value.reshape((-1, 1))
-        predicted_value = predicted_value.reshape((-1, 1))
-        adv_test_cases_instances = np.concatenate((adv_test_cases, true_value, predicted_value), axis=1)
-
-        return pd.DataFrame(adv_test_cases_instances, columns=dataset_columns)
+        return adversarial_testcases
 
     def _get_model_gdpr_compliance(self):
         """
@@ -362,7 +341,6 @@ class Evaluator:
 
             'evaluation_metrics_train': {} if self.train_dataset is None
             else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
-
             'reliability_diagram': self._get_reliability_diagram(),
 
             'environmental_impact': self._get_environmental_impact(),
