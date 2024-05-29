@@ -5,11 +5,9 @@ from ml_eval_pro.model.evaluated_model import EvaluatedModel
 from ml_eval_pro.model.evaluated_model_catboost import EvaluatedModelCatBoost
 from ml_eval_pro.model.evaluated_model_h2o import EvaluatedModelH2O
 from ml_eval_pro.model.evaluated_model_onnx import EvaluatedModelONNX
-from ml_eval_pro.model.evaluated_model_lightgbm import EvaluatedModelLightGBM
 from ml_eval_pro.model.evaluated_model_pytorch import EvaluatedModelPyTorch
 from ml_eval_pro.model.evaluated_model_sklearn import EvaluatedModelSKLearn
 from ml_eval_pro.model.evaluated_model_sparkmllib import EvaluatedModelSparkMLLib
-from ml_eval_pro.model.evaluated_model_stats import EvaluatedModelStats
 from ml_eval_pro.model.evaluated_model_tensorflow import EvaluatedModelTensorflow
 
 
@@ -33,9 +31,7 @@ class EvaluatedModelFactory:
                                       "mlflow.h2o": EvaluatedModelH2O,
                                       "mlflow.spark": EvaluatedModelSparkMLLib,
                                       "mlflow.catboost": EvaluatedModelCatBoost,
-                                      "mlflow.lightgbm": EvaluatedModelLightGBM,
                                       "mlflow.onnx": EvaluatedModelONNX,
-                                      "mlflow.statsmodels": EvaluatedModelStats,
                                       # "mlflow.tensorflow": EvaluatedModelTensorflow,
                                       # "mlflow.keras": EvaluatedModelKeras,
                                       # "mlflow.pytorch": EvaluatedModelPyTorch

@@ -5,19 +5,19 @@ class CategoricalFeatures:
     """
         A class for handling categorical features in a dataset.
     """
-    def __init__(self, X_test, feature_index):
+    def __init__(self, test_dataset, feature_index):
         """
         Initialize a CategoricalFeatures instance.
 
         Parameters:
 
-        X_test : array-like
+        test_dataset : array-like
             The feature matrix of the dataset.
 
         feature_index : int
             The index of the categorical feature to be modified.
         """
-        self.X_test = X_test
+        self.test_dataset = test_dataset
         self.feature_index = feature_index
 
     def apply(self):
@@ -25,16 +25,16 @@ class CategoricalFeatures:
         Apply categorical feature transformation by replacing values with random choices.
 
         Returns:
-            X_test_copy :
+            test_dataset_copy :
                 array-like: A modified copy of the feature matrix with transformed categorical feature.
         """
-        X_test_copy = np.copy(self.X_test)
-        unique_values = [np.unique(self.X_test[:, self.feature_index])]
+        test_dataset_copy = np.copy(self.test_dataset)
+        unique_values = [np.unique(self.test_dataset[:, self.feature_index])]
         if len(unique_values[0]) > 1:
-            for i in range(self.X_test.shape[0]):
-                old_value = self.X_test[i, self.feature_index]
+            for i in range(self.test_dataset.shape[0]):
+                old_value = self.test_dataset[i, self.feature_index]
                 new_value = np.random.choice(np.setdiff1d(unique_values, [old_value]))
-                X_test_copy[i, self.feature_index] = new_value
-            return X_test_copy
+                test_dataset_copy[i, self.feature_index] = new_value
+            return test_dataset_copy
         else:
-            return X_test_copy
+            return test_dataset_copy

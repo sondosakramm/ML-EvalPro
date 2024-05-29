@@ -1,20 +1,14 @@
-import os
-
-import numpy as np
-
-from ml_eval_pro.configuration_manager.configuration_reader.yaml_reader import YamlReader
 from ml_eval_pro.summary.summary_generator import SummaryGenerator
 
 
 class BiasSummary(SummaryGenerator):
-    def __init__(self, biased_features: dict):
+    def __init__(self, biased_features: dict, threshold: float):
         self.biased_features = biased_features
-        yaml_reader = YamlReader(os.path.join(os.path.curdir, "ml_eval_pro",
-                                              "config_files", "system_config.yaml"))
-        self.threshold = yaml_reader.get('thresholds')['bias_threshold']
+        self.threshold = threshold
 
     def get_summary(self):
-        res_str = (f"By dividing the data by the unique values of each feature, each feature is evaluated independently,"
+        res_str = (f"By dividing the data by the unique values of each feature, each feature is evaluated "
+                   f"independently,"
                    f" and the model is evaluated for each unique value. Next, by comparing the differences"
                    f" in each value, the feature's absolute average performance is calculated.\n"
                    f"A comparison of the absolute average performances ")

@@ -1,18 +1,5 @@
-import os
-
 import numpy as np
 import shap
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, BaggingClassifier, BaggingRegressor, \
-    AdaBoostClassifier, AdaBoostRegressor, GradientBoostingClassifier, GradientBoostingRegressor, StackingClassifier, \
-    StackingRegressor
-from sklearn.linear_model import LogisticRegression, Ridge, ElasticNet, Lasso, LinearRegression
-from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor, RadiusNeighborsClassifier, \
-    RadiusNeighborsRegressor
-from sklearn.svm import SVC, NuSVC, SVR, NuSVR
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, ExtraTreeClassifier, ExtraTreeRegressor
-from xgboost import XGBRegressor
-
-from ml_eval_pro.configuration_manager.configuration_reader.yaml_reader import YamlReader
 from ml_eval_pro.gdpr.gdpr_compliance import GdprCompliance
 from ml_eval_pro.transparency.transparency_factory import TransparencyFactory
 
@@ -22,26 +9,36 @@ class ModelTransparency(GdprCompliance):
 
     A class for evaluating model transparency and explain-ability based on GDPR compliance rules.
 
-    Parameters: - model: The trained machine learning model to be evaluated for transparency. - X_test: The feature
-    matrix of the test dataset. - y_test: The target values of the test dataset. - problem_type: The type of machine
-    learning problem, either 'classification' or 'regression' (default is 'classification'). - X_train: The feature
-    matrix of the training dataset (optional). - y_train: The target values of the training dataset (optional).
+    Parameters:
+    - model: The trained machine learning model to be evaluated for transparency. - test_dataset: The
+    feature matrix of the test dataset.
+    - test_target: The target values of the test dataset.
+    - problem_type: The
+    - shap_threshold: The SHAP (SHapley Additive exPlanations) value threshold for model interpretability.
+    type of machine learning problem, either 'classification' or 'regression' (default is 'classification'). -
+    train_dataset: The feature matrix of the training dataset (optional).
+    - train_target: The target values of the
+    training dataset (optional).
 
     Attributes:
     - model: The trained machine learning model.
-    - X_test: The feature matrix of the test dataset.
-    - y_test: The target values of the test dataset.
+    - test_dataset: The feature matrix of the test dataset.
+    - test_target: The target values of the test dataset.
     - problem_type: The type of machine learning problem.
-    - X_train: The feature matrix of the training dataset (can be None if not provided).
-    - y_train: The target values of the training dataset (can be None if not provided).
+    - train_dataset: The feature matrix of the training dataset (can be None if not provided).
+    - train_target: The target values of the training dataset (can be None if not provided).
 
     """
 
-    def __init__(self, model, X_test, y_test, problem_type='classification', X_train=None, y_train=None,
-                 features_description: dict = None, num_of_classes: int = 2, n_bins: int = 5):
-        super().__init__(model, X_test, y_test, problem_type, X_train, y_train, features_description, num_of_classes,
-                         n_bins)
+    def __init__(self, model, X_test, y_test, shap_threshold: float = 0.05, problem_type='classification', X_train=None,
+                 y_train=None, features_description: dict = None, num_of_classes: int = 2, n_bins: int = 5):
+
+        super().__init__(model=model, X_test=X_test, y_test=y_test, problem_type=problem_type,
+                         X_train=X_train, y_train=y_train, features_description=features_description,
+                         num_of_classes=num_of_classes,
+                         n_bins=n_bins)
         self.avg_entropy = 0.1
+        self.shap_threshold = shap_threshold
 
 
     @staticmethod
@@ -61,11 +58,7 @@ class ModelTransparency(GdprCompliance):
 
     def check_significance(self):
         """Check if the average entropy is below a predefined significance threshold."""
-        significant = YamlReader(os.path.join(os.path.curdir,
-                                              "ml_eval_pro",
-                                              "config_files",
-                                              "system_config.yaml")).get("thresholds")["shap_significance"]
-        if self.avg_entropy < significant:
+        if self.avg_entropy < self.shap_threshold:
             return True
         return False
 
@@ -73,4 +66,3 @@ class ModelTransparency(GdprCompliance):
         """Check the explain-ability of the model based on its type."""
         model_transparency = TransparencyFactory.create(self.model)
         return model_transparency.get_model_transparency()
-

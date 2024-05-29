@@ -7,11 +7,13 @@ from ml_eval_pro.carbon.carbon_emission.carbon import Carbon
 from ml_eval_pro.carbon.carbon_emission.carbon_calculator import CarbonCalculator
 from ml_eval_pro.carbon.inference_time.inference_time import InferenceTime
 from ml_eval_pro.ethical_analysis.ethical_analysis import EthicalAnalysis
+from ml_eval_pro.evaluation_metrics.evaluators_factory import EvaluatorsFactory
 from ml_eval_pro.gdpr.gdpr_rules.model_ethical import ModelEthical
 from ml_eval_pro.gdpr.gdpr_rules.model_reliability import ModelReliability
 from ml_eval_pro.gdpr.gdpr_rules.model_robustness import ModelRobustness
 from ml_eval_pro.gdpr.gdpr_rules.model_transparency import ModelTransparency
 from ml_eval_pro.model.evaluated_model_factory import EvaluatedModelFactory
+from ml_eval_pro.model_fairness.model_fairness_factory import ModelFairnessFactory
 from ml_eval_pro.summary.modules_summary.bias_summary import BiasSummary
 from ml_eval_pro.summary.modules_summary.carbon_summary import CarbonSummary
 from ml_eval_pro.summary.modules_summary.equalized_odds_summary import EqualizedOddsSummary
@@ -22,9 +24,7 @@ from ml_eval_pro.summary.modules_summary.model_robustness_summary import ModelRo
 from ml_eval_pro.summary.modules_summary.model_transparency_summary import ModelTransparencySummary
 from ml_eval_pro.summary.modules_summary.variance_summary import VarianceSummary
 from ml_eval_pro.utils.validate_model_type import get_num_classes
-from ml_eval_pro.evaluation_metrics.evaluators_factory import EvaluatorsFactory
-from ml_eval_pro.variance.model_variance_by_test_data import ModelVarianceByTestData
-from ml_eval_pro.variance.model_variance_by_train_test_data import ModelVarianceByTrainTestData
+from ml_eval_pro.variance.model_var.model_variance_factory import ModelVarianceFactory
 
 
 class Evaluator:
@@ -32,7 +32,7 @@ class Evaluator:
     def __init__(self, model_uri, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
                  evaluation_metrics: list, features_description: dict, dataset_context: str,
                  train_dataset: pd.DataFrame = None, train_target: pd.Series = None,
-                 spark_session=None, spark_feature_col_name="features"):
+                 spark_session=None, spark_feature_col_name="features", **kwargs):
         """
         Create an instance of the auto evaluator to get all the evaluation metrics.
         :param model_uri: the model uri.
@@ -46,6 +46,20 @@ class Evaluator:
         :param train_target: the train dataset target.
         :param spark_session: the spark session (used in spark models only).
         :param spark_feature_col_name: the spark features column name (used in spark models only).
+        :param kwargs: Additional configuration parameters, including:
+                       - shap_threshold (float): The SHAP (SHapley Additive exPlanations) value threshold for
+                                                 model interpretability.
+                       - ece_threshold (float): The Expected Calibration Error (ECE) threshold for evaluating
+                                                model calibration.
+                       - bias_threshold (float): The bias threshold for assessing model bias.
+                       - variance_threshold (float): The variance threshold for assessing model variance.
+                       - variance_step_size (float): The step size to be used when adjusting variance.
+                       - cpu_name (str): The name of the CPU being used.
+                       - cpu_speed (float): The speed of the CPU in GHz.
+                       - cpu_value (float): The value or performance index of the CPU.
+                       - energy_name (str): The name or type of energy resource being used.
+                       - energy_value (float): The value or consumption rate of the energy resource.
+                       - llama_model (str): The name of the llama model to get unethical features.
         :return: An instance of the auto evaluator.
         """
         self.spark_feature_col_name = spark_feature_col_name
@@ -75,6 +89,19 @@ class Evaluator:
 
         self.features_description = features_description
         self.dataset_context = dataset_context
+        self.kwargs = kwargs
+
+        self.shap_threshold = self.kwargs.get('shap_threshold', 0.05)
+        self.ece_threshold = self.kwargs.get('ece_threshold', 0.05)
+        self.bias_threshold = self.kwargs.get('bias_threshold', 0.15)
+        self.variance_threshold = self.kwargs.get('variance_threshold', 0.15)
+        self.variance_step_size = self.kwargs.get('variance_step_size', 0.5)
+        self.cpu_name = self.kwargs.get('cpu_name', 'Xeon')
+        self.cpu_speed = self.kwargs.get('cpu_speed', 2.2)
+        self.cpu_value = self.kwargs.get('cpu_value', 0.061)
+        self.energy_name = self.kwargs.get('energy_name', 'Fuel')
+        self.energy_value = self.kwargs.get('energy_value', 0.865)
+        self.llama_model = self.kwargs.get('llama_model', 'llama3')
 
         # TODO: to be removed after proper code refactoring
         self.unethical_features = None
@@ -125,7 +152,9 @@ class Evaluator:
                               + inference_time.calc_inference_time_minutes() * 60
                               + inference_time.calc_inference_time_seconds())
 
-        carbon_emission = Carbon(self.model_pipeline, self.test_dataset)
+        carbon_emission = Carbon(self.model_pipeline, self.test_dataset, cpu_name=self.cpu_name,
+                                 cpu_speed=self.cpu_speed, cpu_value=self.cpu_value,
+                                 energy_name=self.energy_name, energy_value=self.energy_value)
         carbon_emission_calc = CarbonCalculator(carbon_emission)
 
         carbon_emission_carbon_per_prediction = carbon_emission_calc.calculate_carbon()
@@ -145,16 +174,25 @@ class Evaluator:
         :return: a dictionary of the biased features and summary in the model.
         """
         print("Evaluating the model bias and fairness...")
-        eval_metric = "MAPE" if self.model_type == 'regression' else "Accuracy"
+        eval_metric = 'MAPE' if self.model_type == 'regression' else 'Accuracy'
 
         model_bias = ModelFairnessFactory.create("bias",
                                                  model=self.model_pipeline,
                                                  model_type=self.model_type,
                                                  data=self.test_dataset,
                                                  target=self.test_target,
-                                                 evaluation_metrics=[eval_metric])
+                                                 evaluation_metrics=[eval_metric],
+                                                 threshold=self.bias_threshold)
 
         biased_features = model_bias.get_model_fairness()
+
+        if self.model_type == 'regression':
+            return {
+                "biased_features": list(biased_features.keys()),
+                "bias_summary": BiasSummary(biased_features, self.bias_threshold).get_summary(),
+                "equalized_odds": 'Not supported in regression...'
+            }
+
 
         model_equalized_odds = ModelFairnessFactory.create("equalized odds",
                                                            model=self.model_pipeline,
@@ -166,7 +204,7 @@ class Evaluator:
 
         return {
             "biased_features": list(biased_features.keys()),
-            "bias_summary": BiasSummary(biased_features).get_summary(),
+            "bias_summary": BiasSummary(biased_features, self.bias_threshold).get_summary(),
             "equalized_odds": EqualizedOddsSummary(equalized_odds_features_vals).get_summary()
         }
 
@@ -176,18 +214,33 @@ class Evaluator:
         :return: the model variance and its summary.
         """
         print("Evaluating the model variance ...")
+        eval_metric = 'MAE' if self.model_type == 'regression' else 'Accuracy'
         variance_res = {}
         if self.train_target is not None:
-            variance_train = ModelVarianceByTrainTestData(self.model_pipeline, self.test_dataset, self.test_target,
-                                                          self.train_dataset, self.train_target, self.model_type)
-            variance_res['variance_train_value'] = variance_train.calculate_variance()
-            variance_res['variance_train_summary'] = VarianceSummary(variance_train).get_summary()
+            model_variance = ModelVarianceFactory.create(variance_type='train_test_data',
+                                                         model=self.model_pipeline,
+                                                         model_type=self.model_type,
+                                                         train_dataset=self.train_dataset,
+                                                         train_target=self.train_target,
+                                                         test_dataset=self.test_dataset,
+                                                         target=self.test_target,
+                                                         evaluation_metric=eval_metric,
+                                                         threshold=self.variance_threshold)
+            variance_res['variance_train_value'] = model_variance.calculate_variance()
+            variance_res['variance_train_summary'] = VarianceSummary(model_variance).get_summary()
+        else:
+            model_variance = ModelVarianceFactory.create(variance_type='test_data',
+                                                         model=self.model_pipeline,
+                                                         model_type=self.model_type,
+                                                         data=self.test_dataset,
+                                                         target=self.test_target,
+                                                         evaluation_metric=eval_metric,
+                                                         threshold=self.variance_threshold,
+                                                         step_size=self.variance_step_size)
+            model_variance.calculate_variance()
+            variance_res['high_variant_features'] = model_variance.get_diff()
+            variance_res['variance_features_summary'] = VarianceSummary(model_variance).get_summary()
 
-        variance_test = ModelVarianceByTestData(self.model_pipeline, self.test_dataset, self.test_target,
-                                                self.model_type)
-        variance_test.calculate_variance()
-        variance_res['high_variant_features'] = variance_test.get_diff()
-        variance_res['variance_features_summary'] = VarianceSummary(variance_test).get_summary()
         return variance_res
 
     def _get_feature_importance(self) -> dict:
@@ -198,7 +251,7 @@ class Evaluator:
         print("Evaluating the model ethical issues according to the features importance ...")
         ethical_analysis = EthicalAnalysis(self.model_pipeline, self.test_dataset,
                                            self.features_description, self.dataset_context)
-        feature_importance, unethical_features = ethical_analysis()
+        feature_importance, unethical_features = ethical_analysis(llama_model=self.llama_model)
 
         # TODO: to be removed after proper code refactoring
         self.unethical_features = unethical_features
@@ -262,9 +315,10 @@ class Evaluator:
         model_transparency = ModelTransparency(model=self.model_pipeline,
                                                X_test=self.test_dataset,
                                                y_test=self.test_target,
-                                               problem_type=self.model_type)
+                                               problem_type=self.model_type,
+                                               shap_threshold=self.shap_threshold)
 
-        return (ModelReliabilitySummary(model_reliability).get_summary() +
+        return (ModelReliabilitySummary(model_reliability, self.ece_threshold).get_summary() +
                 '\n' + ModelEthicalSummary(model_ethical).get_summary() +
                 '\n' + ModelRobustnessSummary(model_robustness).get_summary() +
                 '\n' + ModelTransparencySummary(model_transparency).get_summary())
@@ -287,7 +341,7 @@ class Evaluator:
 
             'evaluation_metrics_train': {} if self.train_dataset is None
             else self._get_evaluation_metrics(self.train_target, self.train_predictions, self.train_predictions_prob),
-            #
+
             'reliability_diagram': self._get_reliability_diagram(),
 
             'environmental_impact': self._get_environmental_impact(),
@@ -301,7 +355,7 @@ class Evaluator:
             'adversarial_test_cases': self._get_adversarial_test_cases(),
 
             'gdpr_compliance': self._get_model_gdpr_compliance(),
-
+            #
             # 'machine_unlearning': self.__get_machine_unlearning_ability()
 
         }

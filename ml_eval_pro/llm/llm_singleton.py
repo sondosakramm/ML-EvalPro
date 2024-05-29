@@ -13,20 +13,20 @@ class LLMSingleton:
     """
     __llm = None
 
-    def __new__(cls):
+    def __new__(cls, llama_model: str = "llama3"):
         if not cls.__llm:
-            cls.__llm = cls.__create_llm()
+            cls.__llm = cls.__create_llm(llama_model)
         return cls.__llm
 
     @classmethod
-    def __create_llm(cls):
+    def __create_llm(cls, llama_model):
         """
         Initializing the LLM.
         :return: the instantiated model.
         """
         print("Creating the LLM model ...")
 
-        model = ChatOllama(model="llama3", temperature=0.0)
+        model = ChatOllama(model=llama_model, temperature=0.0)
 
         return model
 

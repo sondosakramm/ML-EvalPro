@@ -23,3 +23,4 @@ class ModelFairnessFactory:
             return subclass(*args, **kwargs)
         else:
             raise Exception(f'Cannot find "{fairness_type}"')
+

@@ -10,12 +10,12 @@ class GdprCompliance(ABC):
         """
         Parameters:
         - model: The trained machine learning model to be evaluated for GDPR compliance (optional).
-        - X_test: The feature matrix of the test dataset (optional).
-        - y_test: The target values of the test dataset (optional).
+        - test_dataset: The feature matrix of the test dataset (optional).
+        - test_target: The target values of the test dataset (optional).
         - problem_type: The type of machine learning problem, either 'classification' or 'regression'
                         (default is 'classification').
-        - X_train: The feature matrix of the training dataset (optional).
-        - y_train: The target values of the training dataset (optional).
+        - train_dataset: The feature matrix of the training dataset (optional).
+        - train_target: The target values of the training dataset (optional).
         - features_description: a short description for each feature. (optional)
         - dataset_context: a description for the dataset context. (optional)
         - num_of_classes: Number of classes (only for classification tasks) (default=2).
@@ -23,11 +23,11 @@ class GdprCompliance(ABC):
 
         Attributes:
         - model: The trained machine learning model (can be None if not provided)..
-        - X_test: The feature matrix of the test dataset (can be None if not provided)..
-        - y_test: The target values of the test dataset (can be None if not provided)..
+        - test_dataset: The feature matrix of the test dataset (can be None if not provided)..
+        - test_target: The target values of the test dataset (can be None if not provided)..
         - problem_type: The type of machine learning problem.
-        - X_train: The feature matrix of the training dataset (can be None if not provided).
-        - y_train: The target values of the training dataset (can be None if not provided).
+        - train_dataset: The feature matrix of the training dataset (can be None if not provided).
+        - train_target: The target values of the training dataset (can be None if not provided).
         - features_description: a short description for each feature. (can be None if not provided)
         - num_of_classes: Number of classes (only for classification tasks) (default=2).
         - n_bins: the number of bins needed (default=5).

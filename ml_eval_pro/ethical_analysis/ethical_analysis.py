@@ -40,15 +40,17 @@ class EthicalAnalysis:
         return (feature_importance_all_vals,
                 EthicalAnalysis.prompt_feature_ethnicity(self.features_description,
                                                          self.dataset_context,
-                                                         self.data))
+                                                         self.data,
+                                                         llama_model=kwargs['llama_model']))
 
     @classmethod
-    def prompt_feature_ethnicity(cls, features_description, dataset_context: str, dataset: pd.DataFrame):
+    def prompt_feature_ethnicity(cls, features_description, dataset_context: str, dataset: pd.DataFrame, llama_model):
         """
         Prompting ethnicity of the input features.
         :param features_description: the description of each feature.
         :param dataset_context: a description of the dataset context.
         :param dataset: the dataset given.
+        :param llama_model: The name of the llama model to get unethical features.
         :return: the ethical perspective of the given features.
         """
         dataset_sample = dataset.iloc[:10, :] if dataset.shape[0] >= 10 else dataset
@@ -56,7 +58,8 @@ class EthicalAnalysis:
         dataset_sample_str = dataset_sample.to_dict('list').__str__()
 
         unethical_features = cls.get_unethical_features(features_description, dataset_context,
-                                                        dataset_sample_str[1:len(dataset_sample_str)-1])
+                                                        dataset_sample_str[1:len(dataset_sample_str)-1],
+                                                        llama_model)
 
         if len(unethical_features) == 0:
             return f"No unethical feature was detected."
@@ -68,15 +71,17 @@ class EthicalAnalysis:
                 f"reasons:" + res_str)
 
     @classmethod
-    def get_unethical_features(cls, features_descriptions: dict, dataset_context: str, dataset_sample_str: str) -> dict:
+    def get_unethical_features(cls, features_descriptions: dict, dataset_context: str, dataset_sample_str: str,
+                               llama_model: str) -> dict:
         """
          Prompting the unethical features given their description with LLMs.
          :param features_descriptions: the description of each feature.
          :param dataset_context: a description of the dataset context.
          :param dataset_sample_str: a sample from the dataset.
+         :param llama_model: The name of the llama model to get unethical features.
          :return: the unethical features and the reason of being unethical.
          """
-        LLMSingleton()
+        LLMSingleton(llama_model=llama_model)
 
         features_str = features_descriptions.__str__()
 
