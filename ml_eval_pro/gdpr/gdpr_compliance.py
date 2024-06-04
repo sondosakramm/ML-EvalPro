@@ -6,7 +6,7 @@ class GdprCompliance(ABC):
 
     def __init__(self, model=None, X_test=None, y_test=None, problem_type='classification', X_train=None, y_train=None,
                  features_description: dict = None, dataset_context: str = None, num_of_classes: int = 2, n_bins: int = 5,
-                 unethical_features=None, adversarial_attack_model=None, adversarial_testcases=None):
+                 unethical_features=None, robustness=None, llama_model='llama3'):
         """
         Parameters:
         - model: The trained machine learning model to be evaluated for GDPR compliance (optional).
@@ -40,10 +40,10 @@ class GdprCompliance(ABC):
         self.y_train = y_train
         self.num_of_classes = num_of_classes
         self.n_bins = n_bins
+        self.llama_model = llama_model
         self.features_description = features_description
         self.dataset_context = dataset_context
 
         # TODO: to be removed after proper code refactoring
         self.unethical_features = unethical_features
-        self.adversarial_attack_model = adversarial_attack_model
-        self.adversarial_testcases = adversarial_testcases
+        self.robustness=robustness
