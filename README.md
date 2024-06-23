@@ -125,4 +125,4 @@ evaluator = Evaluator(model_uri=model_info.model_uri,
 print(evaluator.get_evaluations())
 ```
 
-
+## Demo Dashboard [URL](http://172.178.116.34:8051/)
