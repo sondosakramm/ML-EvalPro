@@ -10,7 +10,7 @@ def get_config(**kwargs):
         'cpu_value': 0.061,
         'energy_name': 'Fuel',
         'energy_value': 0.865,
-        'llama_model': 'llama3',
+        'llama_model': 'llama3.2',
         'bins': 10
     }
 
