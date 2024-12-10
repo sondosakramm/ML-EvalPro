@@ -6,7 +6,7 @@ class GdprCompliance(ABC):
 
     def __init__(self, model=None, X_test=None, y_test=None, problem_type='classification', X_train=None, y_train=None,
                  features_description: dict = None, dataset_context: str = None, num_of_classes: int = 2, n_bins: int = 5,
-                 unethical_features=None, robustness=None, llama_model='llama3'):
+                 unethical_features=None, robustness=None, llama_model='llama3.2'):
         """
         Parameters:
         - model: The trained machine learning model to be evaluated for GDPR compliance (optional).
