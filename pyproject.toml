@@ -19,7 +19,3 @@ classifiers = [
     "License :: OSI Approved",
     "Operating System :: OS Independent",
 ]
-
-#[project.urls]
-#Homepage = "https://github.com/pypa/sampleproject"
-#Issues = "https://github.com/pypa/sampleproject/issues"
