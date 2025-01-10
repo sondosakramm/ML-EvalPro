@@ -13,7 +13,7 @@ class LLMSingleton:
     """
     __llm = None
 
-    def __new__(cls, llama_model: str = "llama3"):
+    def __new__(cls, llama_model: str = "llama3.2"):
         if not cls.__llm:
             cls.__llm = cls.__create_llm(llama_model)
         return cls.__llm

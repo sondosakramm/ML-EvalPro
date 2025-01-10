@@ -1,6 +1,7 @@
 import mlflow
 import numpy as np
 from pyspark.ml.feature import VectorAssembler
+from pyspark.sql import SparkSession
 
 from ml_eval_pro.model.evaluated_model import EvaluatedModel
 
@@ -10,18 +11,18 @@ class EvaluatedModelSparkMLLib(EvaluatedModel):
     A class for generating the evaluated spark model object.
     """
 
-    def __init__(self, model_uri, model_type, problem_type, spark_feature_col_name, spark_session):
+    def __init__(self, model_uri, model_type, problem_type, spark_feature_col_name, spark_session_name):
         """
         Initializing the evaluation metric needed values.
         :param model_uri: the model uri.
         :param model_type: the model type (flavor).
         :param problem_type: the problem type (regression or classification).
         :param spark_feature_col_name: the spark features column name (used in spark models only).
-        :param spark_session: the spark session (used in spark models only).
+        :param spark_session_name: the spark name session (used in spark models only).
         """
         super().__init__(model_uri, model_type, problem_type)
         self.spark_feature_col_name = spark_feature_col_name
-        self.spark_session = spark_session
+        self.spark_session = spark = SparkSession.builder.appName(spark_session_name).getOrCreate()
 
     def load(self):
         """

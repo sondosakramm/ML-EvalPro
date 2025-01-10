@@ -3,7 +3,7 @@
 ML-EvalPro is a platform designed to advance ML model evaluation by providing a comprehensive suite of tools for automated testing and analysis for supervised machine learning tasks.
 
 ## Prequist Requirements
-  1. [Apache Spark](https://spark.apache.org/downloads.html) 
+  1. Python >3.8
   2. [Ollama](https://ollama.com/)
      * After downloading open anaconda prompt and run this command
        ```bash
@@ -12,7 +12,7 @@ ML-EvalPro is a platform designed to advance ML model evaluation by providing a 
       
      * From terminal run this command
        ```bash
-       ollama pull llama3
+       ollama pull llama3.2
        ```
 
 ## Installation
@@ -125,4 +125,5 @@ evaluator = Evaluator(model_uri=model_info.model_uri,
 print(evaluator.get_evaluations())
 ```
 
-
+#### Demo Dashboard [URL](http://172.178.116.34:8051/)
+#### Demo Video [URL](https://youtu.be/2qXIZtJNMSo)

@@ -1,8 +1,6 @@
-import numpy as np
 import pandas as pd
 
 from ml_eval_pro.adverserial_test_cases.adversarial_attack_factory import AdversarialAttackFactory
-from ml_eval_pro.model_fairness.model_fairness_factory import ModelFairnessFactory
 from ml_eval_pro.carbon.carbon_emission.carbon import Carbon
 from ml_eval_pro.carbon.carbon_emission.carbon_calculator import CarbonCalculator
 from ml_eval_pro.carbon.inference_time.inference_time import InferenceTime
@@ -27,12 +25,12 @@ from ml_eval_pro.utils.validate_model_type import get_num_classes
 from ml_eval_pro.variance.model_var.model_variance_factory import ModelVarianceFactory
 
 
-class Evaluator:
+class EvaluatorLegacy:
 
     def __init__(self, model_uri, model_type: str, test_dataset: pd.DataFrame, test_target: pd.Series,
                  evaluation_metrics: list, features_description: dict, dataset_context: str,
                  train_dataset: pd.DataFrame = None, train_target: pd.Series = None,
-                 spark_session=None, spark_feature_col_name="features", **kwargs):
+                 spark_session_name=None, spark_feature_col_name="features", **kwargs):
         """
         Create an instance of the auto evaluator to get all the evaluation metrics.
         :param model_uri: the model uri.
@@ -44,7 +42,7 @@ class Evaluator:
         :param dataset_context: a description of the dataset context.
         :param train_dataset: the train dataset features.
         :param train_target: the train dataset target.
-        :param spark_session: the spark session (used in spark models only).
+        :param spark_session_name: the spark session name(used in spark models only).
         :param spark_feature_col_name: the spark features column name (used in spark models only).
         :param kwargs: Additional configuration parameters, including:
                        - shap_threshold (float): The SHAP (SHapley Additive exPlanations) value threshold for
@@ -64,9 +62,10 @@ class Evaluator:
         """
         self.spark_feature_col_name = spark_feature_col_name
         self.model_pipeline = EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type) \
-            if spark_session is None else EvaluatedModelFactory.create(model_uri=model_uri, problem_type=model_type,
-                                                                       spark_feature_col_name=spark_feature_col_name,
-                                                                       spark_session=spark_session)
+            if spark_session_name is None else EvaluatedModelFactory.create(model_uri=model_uri,
+                                                                            problem_type=model_type,
+                                                                            spark_feature_col_name=spark_feature_col_name,
+                                                                            spark_session=spark_session_name)
         self.model_type = model_type
         self.test_dataset = test_dataset
         self.test_target = test_target
@@ -102,11 +101,11 @@ class Evaluator:
         self.energy_name = self.kwargs.get('energy_name', 'Fuel')
         self.energy_value = self.kwargs.get('energy_value', 0.865)
         self.llama_model = self.kwargs.get('llama_model', 'llama3')
+        self.bins = self.kwargs.get('bins', 10)
 
         # TODO: to be removed after proper code refactoring
         self.unethical_features = None
-        self.adversarial_attack_model = None
-        self.adversarial_testcases = None
+        self.robustness = None
 
     def _get_evaluation_metrics(self, target, predictions, predictions_prob):
         """
@@ -148,12 +147,14 @@ class Evaluator:
         if self.model_type == 'regression':
             return EvaluatorsFactory.create(f"{self.model_type} reliability evaluation",
                                             self.test_target,
-                                            self.test_predictions).measure()
+                                            self.test_predictions,
+                                            n_bins=self.bins).measure()
         else:
             return EvaluatorsFactory.create(f"{self.model_type} reliability evaluation",
                                             self.test_target,
                                             self.test_predictions_prob,
                                             num_of_classes=self.num_classes).measure()
+
 
     def _get_environmental_impact(self) -> dict:
         """
@@ -283,18 +284,19 @@ class Evaluator:
         print("Generating the model adversarial test cases ...")
         dataset_columns = list(self.test_dataset.columns)
 
-        self.adversarial_attack_model = (
-            AdversarialAttackFactory.create("substitute_hopskipjump", self.model_pipeline, self.model_type,
+        adversarial_attack_model = (
+            AdversarialAttackFactory.create("substitute_zoo", self.model_pipeline, self.model_type,
                                             self.test_dataset, self.test_target, dataset_columns,
                                             num_classes=self.num_classes) if self.train_target is None else
 
-            AdversarialAttackFactory.create("substitute_hopskipjump", self.model_pipeline, self.model_type,
+            AdversarialAttackFactory.create("substitute_zoo", self.model_pipeline, self.model_type,
                                             self.test_dataset, self.test_target, dataset_columns,
                                             train_input_features=self.train_dataset,
                                             train_target_features=self.train_target,
                                             num_classes=self.num_classes))
 
-        adversarial_testcases = self.adversarial_attack_model.get_adversarial_testcases()
+        adversarial_testcases = adversarial_attack_model.get_adversarial_testcases()
+        self.robustness = adversarial_attack_model.is_robust
 
         return adversarial_testcases
 
@@ -325,8 +327,7 @@ class Evaluator:
                                            X_train=self.train_dataset,
                                            y_train=self.train_target,
                                            problem_type=self.model_type,
-                                           adversarial_attack_model=self.adversarial_attack_model,
-                                           adversarial_testcases=self.adversarial_testcases)
+                                           robustness=self.robustness)
 
         model_transparency = ModelTransparency(model=self.model_pipeline,
                                                X_test=self.test_dataset,

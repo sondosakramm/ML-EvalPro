@@ -25,9 +25,10 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         :param dataset_columns: the features name of the dataset.
         :return: the created adversarial attack.
         """
+        super().__init__()
+
         self.model_type = model_type
         self.model = model
-        self.not_robust = None
 
         self.test_target_features = convert_dataframe_to_numpy(test_target_features)
         self.train_target_features = convert_dataframe_to_numpy(train_target_features)
@@ -55,8 +56,6 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         self.test_input_features = convert_dataframe_to_numpy(self.test_input_features)
 
         self.dataset_columns = dataset_columns
-
-        self.__is_robust = None
 
     def get_adversarial_testcases(self):
         """
@@ -87,10 +86,10 @@ class AdversarialAttackSubstitute(AdversarialAttack):
 
         # if the model is robust, return an empty dataframe
         if not_robust_true_values.size == 0:
-            self.__is_robust = True
+            self.is_robust = True
             return pd.DataFrame(columns=self.dataset_columns)
 
-        self.__is_robust = False
+        self.is_robust = False
         true_value = not_robust_true_values.reshape((-1, 1))
         not_robust_predictions = not_robust_predictions.reshape((-1, 1))
         adv_test_cases_instances = np.concatenate((not_robust_adversarial_examples, true_value, not_robust_predictions),
@@ -105,7 +104,3 @@ class AdversarialAttackSubstitute(AdversarialAttack):
         :param substitute_model: the generated substitute model given the data of the original model.
         """
         pass
-
-    @property
-    def is_robust(self):
-        return self.__is_robust
