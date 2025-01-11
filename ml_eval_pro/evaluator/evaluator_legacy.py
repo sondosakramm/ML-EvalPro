@@ -119,13 +119,23 @@ class EvaluatorLegacy:
         res = {}
         for metric in self.evaluation_metrics:
             if metric == 'Expected Calibration Error' or metric == 'AUC':
-                res[metric] = EvaluatorsFactory.get_evaluator(metric, target,
-                                                              predictions_prob,
-                                                              num_of_classes=self.num_classes).measure()
+                if self.model_type == 'regression':
+                    res[metric] = EvaluatorsFactory.create(metric, target,
+                                                           predictions_prob).measure()
+                else:
+                    res[metric] = EvaluatorsFactory.create(metric, target,
+                                                           predictions_prob,
+                                                           num_of_classes=self.num_classes).measure()
+
             else:
-                res[metric] = EvaluatorsFactory.get_evaluator(metric, target,
-                                                              predictions,
-                                                              num_of_classes=self.num_classes).measure()
+                if self.model_type == 'regression':
+                    res[metric] = EvaluatorsFactory.create(metric, target,
+                                                           predictions).measure()
+                else:
+                    res[metric] = EvaluatorsFactory.create(metric, target,
+                                                           predictions,
+                                                           num_of_classes=self.num_classes).measure()
+
         return res
 
     def _get_reliability_diagram(self):
@@ -134,12 +144,17 @@ class EvaluatorLegacy:
         :return: the reliability diagram values to be displayed in the graph.
         """
         print("Extracting the model reliability diagram ...")
-        return EvaluatorsFactory.get_evaluator(f"{self.model_type} reliability evaluation",
-                                               self.test_target,
-                                               self.test_predictions if self.model_type == 'regression' else
-                                               self.test_predictions_prob,
-                                               num_of_classes=self.num_classes,
-                                               n_bins=self.bins).measure()
+        if self.model_type == 'regression':
+            return EvaluatorsFactory.create(f"{self.model_type} reliability evaluation",
+                                            self.test_target,
+                                            self.test_predictions,
+                                            n_bins=self.bins).measure()
+        else:
+            return EvaluatorsFactory.create(f"{self.model_type} reliability evaluation",
+                                            self.test_target,
+                                            self.test_predictions_prob,
+                                            num_of_classes=self.num_classes).measure()
+
 
     def _get_environmental_impact(self) -> dict:
         """
@@ -292,10 +307,12 @@ class EvaluatorLegacy:
         """
         print("Evaluating the model GDPR Compliance ...")
 
-        model_ethical = ModelEthical(features_description=self.features_description,
+        # TODO: Needs code refactoring
+        model_ethical = ModelEthical(self.model_pipeline, features_description=self.features_description,
                                      dataset_context=self.dataset_context,
                                      X_test=self.test_dataset,
-                                     unethical_features=self.unethical_features)
+                                     unethical_features=self.unethical_features,
+                                     llama_model=self.llama_model)
 
         model_reliability = ModelReliability(model=self.model_pipeline,
                                              X_test=self.test_dataset,
@@ -303,6 +320,7 @@ class EvaluatorLegacy:
                                              problem_type=self.model_type,
                                              num_of_classes=self.num_classes)
 
+        # TODO: Needs code refactoring
         model_robustness = ModelRobustness(model=self.model_pipeline,
                                            X_test=self.test_dataset,
                                            y_test=self.test_target,

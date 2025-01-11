@@ -21,8 +21,9 @@ class ModelReliabilitySummary(SummaryGenerator):
                 )
 
         elif self.model_reliab.problem_type == 'regression':
-            return self.model_reliab.get_metric()
-            # --------------------- Graph ---------------------
+            summary_str = (
+                f'The model reliability evaluation can be observed from the graph.'
+            )
         else:
             summary_str += f'Problem type is not supported.'
         return summary_str

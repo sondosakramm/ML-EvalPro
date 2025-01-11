@@ -15,15 +15,14 @@ class ModelReliability(GdprCompliance):
     def get_metric(self):
         self.prediction = self.model.predict(self.X_test, predict_class=False)
         if self.problem_type == 'regression':
-            return EvaluatorsFactory.get_evaluator(f"{self.problem_type} reliability evaluation",
-                                                   self.X_test,
-                                                   self.prediction,
-                                                   n_bins=self.n_bins).measure()
+            return EvaluatorsFactory.create(f"{self.problem_type} reliability evaluation",
+                                            self.X_test,
+                                            self.prediction,
+                                            n_bins=self.n_bins).measure()
 
         elif self.problem_type == 'classification':
-            evaluator = EvaluatorsFactory.get_evaluator("Expected Calibration Error",
-                                                        self.y_test, self.prediction,
-                                                        self.num_of_classes, self.n_bins)
+            evaluator = EvaluatorsFactory.create("Expected Calibration Error",
+                                                 self.y_test, self.prediction,
+                                                 self.num_of_classes, self.n_bins)
             ece = evaluator.measure()
             return ece
-

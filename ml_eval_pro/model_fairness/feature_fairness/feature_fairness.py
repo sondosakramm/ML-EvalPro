@@ -77,7 +77,7 @@ class FeatureFairness(ABC):
             category_predictions = self.model.predict(category_data)
 
             eval_metrics.append(
-                EvaluatorsFactory.get_evaluator(self.evaluation_metric,
+                EvaluatorsFactory.create(self.evaluation_metric,
                                                 self.target[category_data_index].tolist(),
                                                 category_predictions).measure())
         return eval_metrics

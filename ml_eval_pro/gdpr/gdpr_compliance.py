@@ -43,6 +43,7 @@ class GdprCompliance(ABC):
         self.llama_model = llama_model
         self.features_description = features_description
         self.dataset_context = dataset_context
+        self.llama_model = llama_model
 
         # TODO: to be removed after proper code refactoring
         self.unethical_features = unethical_features

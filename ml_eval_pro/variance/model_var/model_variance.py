@@ -24,7 +24,7 @@ class ModelVariance(ABC):
         pass
 
     def calculate_errors(self, target, predictions):
-        return EvaluatorsFactory.get_evaluator(evaluation_metric=self.evaluation_metric, target=target,
+        return EvaluatorsFactory.create(metric=self.evaluation_metric, target=target,
                                                prediction=predictions).measure()
 
     def get_diff(self):
